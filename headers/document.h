@@ -15,58 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
- * File: app.h
+ * File: document.h
  * Created by kureii on 8/11/24
  */
 #pragma once
 
-#include "document.h"
-#include "imgui.h"
-#include <SDL3/SDL.h>
-#include <vector>
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-#include <SDL3/SDL_opengles2.h>
-#else
-#include <SDL3/SDL_opengl.h>
-#endif
+#include <iostream>
 
 namespace linea_one {
 
-class App {
-public:
-  App();
-  ~App();
-
-  bool Init();
-  void Run();
-private:
-  void ProccessEvents();
-  void Update();
-  void Render();
-
-  bool CreateWindow();
-  bool CreateRenderer();
-
-  void SetupImGui();
-
-  void RenderMenu();
-  void RenderContent();
-
-  void RenderTabs();
-  void RenderTabContent(const Document& doc);
-  void CreateNewDocument();
-  void CloseDocument(int index);
-
-  void HandleShortcuts();
-
-  SDL_Window* p_window_;
-  SDL_Renderer* p_renderer_;
-  bool stop_;
-  ImVec4 clear_color_;
-  std::vector<Document> documents_;
-  ImGuiIO io_;
-  int current_document_ = -1;
-  int new_doc_counter = 1;
+struct Document {
+  std::string name;
 };
 
-} // linea_ona
+}

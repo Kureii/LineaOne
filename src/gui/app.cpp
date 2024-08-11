@@ -20,9 +20,13 @@
  */
 #include "gui/app.h"
 
+#include <format>
 #include <iostream>
 
-namespace linea_ona {
+#include "imgui_impl_sdl3.h"
+#include "imgui_impl_sdlrenderer3.h"
+
+namespace linea_one {
 App::App()
     : p_window_(nullptr),
       p_renderer_(nullptr),
@@ -55,6 +59,7 @@ bool App::Init() {
   }
 
   SetupImGui();
+  io_ = ImGui::GetIO();
   return true;
 }
 
@@ -93,6 +98,8 @@ void App::ProccessEvents() {
         event.window.windowID == SDL_GetWindowID(p_window_))
       stop_ = true;
   }
+
+  HandleShortcuts();
 }
 
 void App::Update() {
@@ -126,7 +133,8 @@ void App::Render() {
 void App::RenderMenu() {
   if (ImGui::BeginMenuBar()) {
     if (ImGui::BeginMenu("File")) {
-      if (ImGui::MenuItem("New file")) { /* TODO: Implement */
+      if (ImGui::MenuItem("New file", "Ctrl+N")) {
+        CreateNewDocument();
       }
       if (ImGui::MenuItem("Open file")) { /* TODO: Implement */
       }
@@ -134,14 +142,26 @@ void App::RenderMenu() {
       }
       if (ImGui::MenuItem("Save as")) { /* TODO: Implement */
       }
-      if (ImGui::MenuItem("Exit")) stop_ = true;
+      if (ImGui::MenuItem("Close file", "Ctrl+W")) {
+        if (current_document_ >= 0 && current_document_ < documents_.size()) {
+          CloseDocument(current_document_);
+        }
+      }
+      if (ImGui::MenuItem("Exit")) {
+        stop_ = true;
+      }
       ImGui::EndMenu();
     }
     ImGui::EndMenuBar();
   }
 }
 
-void App::RenderContent() { ImGui::Text("Hello, fullscreen ImGui!"); }
+void App::RenderContent() {
+  RenderTabs();
+  if (current_document_ >= 0 && current_document_ < documents_.size()) {
+    RenderTabContent(documents_[current_document_]);
+  }
+}
 
 bool App::CreateWindow() {
   // Create window with SDL_Renderer graphics context
@@ -171,7 +191,6 @@ bool App::CreateRenderer() {
 }
 
 void App::SetupImGui() {
-  // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO& io = ImGui::GetIO();
@@ -218,5 +237,61 @@ void App::SetupImGui() {
   // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f,
   // nullptr, io.Fonts->GetGlyphRangesJapanese()); IM_ASSERT(font != nullptr);
 }
+
+void App::RenderTabs() {
+  if (ImGui::BeginTabBar("DocumentTabs", ImGuiTabBarFlags_AutoSelectNewTabs)) {
+    for (uint32_t i = 0; i < documents_.size(); ++i) {
+      bool open = true;
+      if (ImGui::BeginTabItem(documents_[i].name.c_str(), &open, ImGuiTabItemFlags_None)) {
+        current_document_ = i;
+        ImGui::EndTabItem();
+      }
+      if (!open) {
+        CloseDocument(i);
+        i--;
+      }
+    }
+    if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
+      CreateNewDocument();
+    }
+    ImGui::EndTabBar();
+  }
+}
+
+void App::RenderTabContent(const Document& doc) {
+  ImGui::Text("Content of document: %s", doc.name.c_str());
+}
+
+void App::CreateNewDocument() {
+  Document new_doc = {
+    std::format("New Document {}", new_doc_counter++)
+  };
+  documents_.push_back(new_doc);
+  current_document_ = documents_.size() - 1;
+}
+
+void App::CloseDocument(int index) {
+  if (index >= 0 && index < documents_.size()) {
+    documents_.erase(documents_.begin() + index);
+    if (current_document_ >= documents_.size()) {
+      current_document_ = documents_.empty() ? -1 : documents_.size() - 1;
+    }
+  }
+}
+
+void App::HandleShortcuts() {
+  ImGuiIO& io = ImGui::GetIO();
+  if (io.KeyCtrl) {
+    if (ImGui::IsKeyPressed(ImGuiKey_N)) {
+      CreateNewDocument();
+    }
+    if (ImGui::IsKeyPressed(ImGuiKey_W)) {
+      if (current_document_ >= 0 && current_document_ < documents_.size()) {
+        CloseDocument(current_document_);
+      }
+    }
+  }
+}
+
 
 }  // namespace linea_ona
