@@ -32,7 +32,8 @@ App::App()
       p_renderer_(nullptr),
       stop_(false),
       clear_color_(0.45f, 0.55f, 0.6f, 1.0f) {
-  doc_man_ = std::make_unique<DocumentManager>();
+  doc_man_ = std::make_shared<DocumentManager>();
+  input_man_ = std::make_unique<InputManager>(doc_man_);
 }
 
 App::~App() {
@@ -75,32 +76,13 @@ void App::Run() {
   while (!stop_)
 #endif
   {
-    ProccessEvents();
+    stop_ = input_man_->HandleEvents(p_window_);
+    if (input_man_->HandleShortcuts() == ASCII_W) {
+      show_unsaved_dialog_ = true;
+    }
     Update();
     Render();
   }
-}
-
-void App::ProccessEvents() {
-  SDL_Event event;
-  while (SDL_PollEvent(&event)) {
-    // Poll and handle events (inputs, window resize, etc.)
-    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to
-    // tell if dear imgui wants to use your inputs.
-    // - When io.WantCaptureMouse is true, do not dispatch mouse input data to
-    // your main application, or clear/overwrite your copy of the mouse data.
-    // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input
-    // data to your main application, or clear/overwrite your copy of the
-    // keyboard data. Generally you may always pass all inputs to dear imgui,
-    // and hide them from your application based on those two flags.
-    ImGui_ImplSDL3_ProcessEvent(&event);
-    if (event.type == SDL_EVENT_QUIT) stop_ = true;
-    if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED &&
-        event.window.windowID == SDL_GetWindowID(p_window_))
-      stop_ = true;
-  }
-
-  HandleShortcuts();
 }
 
 void App::Update() {
@@ -272,27 +254,6 @@ void App::RenderTabContent(const Document& doc) {
   ImGui::Text("Content of document: %s", doc.name.c_str());
 }
 
-void App::HandleShortcuts() {
-  ImGuiIO const& io = ImGui::GetIO();
-  if (io.KeyCtrl) {
-    if (ImGui::IsKeyPressed(ImGuiKey_N) && !new_doc_finised_) {
-      doc_man_->CreateNewDocument();
-      new_doc_finised_ = true;
-    }
-    if (ImGui::IsKeyPressed(ImGuiKey_W) && !close_doc_finised_) {
-      if (doc_man_->CloseDocumentWithCheck(doc_man_->GetCurrentDocumentIndex()) >= 0) {
-        show_unsaved_dialog_ = true;
-        close_doc_finised_ = true;
-      }
-    }
-  }
-  if (ImGui::IsKeyReleased(ImGuiKey_N) || ImGui::IsKeyReleased(ImGuiKey_LeftCtrl) || ImGui::IsKeyReleased(ImGuiKey_RightCtrl)) {
-    new_doc_finised_ = false;
-  }
-  if (ImGui::IsKeyReleased(ImGuiKey_W) || ImGui::IsKeyReleased(ImGuiKey_LeftCtrl) || ImGui::IsKeyReleased(ImGuiKey_RightCtrl)) {
-    close_doc_finised_= false;
-  }
-}
 void App::RenderUnsavedChangesDialog() {
   ImGui::OpenPopup("Unsaved Changes");
 

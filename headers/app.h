@@ -20,12 +20,15 @@
  */
 #pragma once
 
-#include "document.h"
-#include "document_manager.h"
-#include "imgui.h"
 #include <SDL3/SDL.h>
-#include <vector>
+#include <input_manager.h>
+
 #include <memory>
+#include <vector>
+
+#include <document.h>
+#include <document_manager.h>
+#include "imgui.h"
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL3/SDL_opengles2.h>
 #else
@@ -42,7 +45,6 @@ public:
   bool Init();
   void Run();
 private:
-  void ProccessEvents();
   void Update();
   void Render();
 
@@ -57,15 +59,14 @@ private:
   void RenderTabs();
   void RenderTabContent(const Document& doc);
 
-  void HandleShortcuts();
-
   void RenderUnsavedChangesDialog();
 
   bool stop_;
   SDL_Window* p_window_;
   SDL_Renderer* p_renderer_;
   ImVec4 clear_color_;
-  std::unique_ptr<DocumentManager> doc_man_;
+  std::shared_ptr<DocumentManager> doc_man_;
+  std::unique_ptr<InputManager> input_man_;
   //std::vector<Document> documents_;
 
   bool new_doc_finised_ = false;
