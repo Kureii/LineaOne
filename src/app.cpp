@@ -18,7 +18,7 @@
  * File: app.cpp
  * Created by kureii on 8/11/24
  */
-#include "gui/app.h"
+#include "app.h"
 
 #include <format>
 #include <iostream>
@@ -31,9 +31,9 @@ App::App()
     : p_window_(nullptr),
       p_renderer_(nullptr),
       stop_(false),
-      new_doc_finised_(false),
-      close_doc_finised_(false),
-      clear_color_(0.45f, 0.55f, 0.6f, 1.0f) {}
+      clear_color_(0.45f, 0.55f, 0.6f, 1.0f) {
+  doc_man_ = std::make_unique<DocumentManager>();
+}
 
 App::~App() {
   ImGui_ImplSDLRenderer3_Shutdown();
@@ -135,7 +135,7 @@ void App::RenderMenu() {
   if (ImGui::BeginMenuBar()) {
     if (ImGui::BeginMenu("File")) {
       if (ImGui::MenuItem("New file", "Ctrl+N")) {
-        CreateNewDocument();
+        doc_man_->CreateNewDocument();
       }
       if (ImGui::MenuItem("Open file")) { /* TODO: Implement */
       }
@@ -144,8 +144,8 @@ void App::RenderMenu() {
       if (ImGui::MenuItem("Save as")) { /* TODO: Implement */
       }
       if (ImGui::MenuItem("Close file", "Ctrl+W")) {
-        if (current_document_ >= 0 && current_document_ < documents_.size()) {
-          CloseDocument(current_document_);
+        if (doc_man_->CloseDocumentWithCheck(doc_man_->GetCurrentDocumentIndex()) >= 0) {
+          show_unsaved_dialog_ = true;
         }
       }
       if (ImGui::MenuItem("Exit")) {
@@ -159,8 +159,12 @@ void App::RenderMenu() {
 
 void App::RenderContent() {
   RenderTabs();
-  if (current_document_ >= 0 && current_document_ < documents_.size()) {
-    RenderTabContent(documents_[current_document_]);
+  if (auto current_document = doc_man_->GetCurrentDocument()) {
+    RenderTabContent(*current_document);
+  }
+
+  if (show_unsaved_dialog_) {
+    RenderUnsavedChangesDialog();
   }
 }
 
@@ -241,19 +245,24 @@ void App::SetupImGui() {
 
 void App::RenderTabs() {
   if (ImGui::BeginTabBar("DocumentTabs", ImGuiTabBarFlags_AutoSelectNewTabs)) {
-    for (uint32_t i = 0; i < documents_.size(); ++i) {
+    for (uint32_t i = 0; i < doc_man_->DocumentSize(); ++i) {
       bool open = true;
-      if (ImGui::BeginTabItem(documents_[i].name.c_str(), &open, ImGuiTabItemFlags_None)) {
-        current_document_ = i;
+      if (ImGui::BeginTabItem(doc_man_->GetSpecificDocument(i).name.c_str(), &open, ImGuiTabItemFlags_None)) {
+        doc_man_->SetCurrentDocumentIndex(i);
         ImGui::EndTabItem();
       }
       if (!open) {
-        CloseDocument(i);
-        i--;
+        auto index_to_close = doc_man_->CloseDocumentWithCheck(i);
+        if (index_to_close == -1) {
+          i--;
+        }
+        if (index_to_close > -1) {
+          show_unsaved_dialog_ = true;
+        }
       }
     }
     if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-      CreateNewDocument();
+      doc_man_->CreateNewDocument();
     }
     ImGui::EndTabBar();
   }
@@ -263,33 +272,16 @@ void App::RenderTabContent(const Document& doc) {
   ImGui::Text("Content of document: %s", doc.name.c_str());
 }
 
-void App::CreateNewDocument() {
-  Document new_doc = {
-    std::format("New Document {}", new_doc_counter++)
-  };
-  documents_.push_back(new_doc);
-  current_document_ = documents_.size() - 1;
-}
-
-void App::CloseDocument(int index) {
-  if (index >= 0 && index < documents_.size()) {
-    documents_.erase(documents_.begin() + index);
-    if (current_document_ >= documents_.size()) {
-      current_document_ = documents_.empty() ? -1 : documents_.size() - 1;
-    }
-  }
-}
-
 void App::HandleShortcuts() {
   ImGuiIO const& io = ImGui::GetIO();
   if (io.KeyCtrl) {
     if (ImGui::IsKeyPressed(ImGuiKey_N) && !new_doc_finised_) {
-      CreateNewDocument();
+      doc_man_->CreateNewDocument();
       new_doc_finised_ = true;
     }
     if (ImGui::IsKeyPressed(ImGuiKey_W) && !close_doc_finised_) {
-      if (current_document_ >= 0 && current_document_ < documents_.size()) {
-        CloseDocument(current_document_);
+      if (doc_man_->CloseDocumentWithCheck(doc_man_->GetCurrentDocumentIndex()) >= 0) {
+        show_unsaved_dialog_ = true;
         close_doc_finised_ = true;
       }
     }
@@ -301,6 +293,34 @@ void App::HandleShortcuts() {
     close_doc_finised_= false;
   }
 }
+void App::RenderUnsavedChangesDialog() {
+  ImGui::OpenPopup("Unsaved Changes");
 
+  if (ImGui::BeginPopupModal("Unsaved Changes", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+    ImGui::Text("Document '%s' has unsaved changes. Do you want to save before closing?",
+                doc_man_->GetSpecificDocument(doc_man_->GetDocToClose()).name.c_str());
+    ImGui::Separator();
+
+    if (ImGui::Button("Save", ImVec2(120, 0))) {
+      /* TODO save function */
+      doc_man_->GetSpecificDocument(doc_man_->GetDocToClose()).saved = true;
+      doc_man_->CloseDocument();
+      ImGui::CloseCurrentPopup();
+      show_unsaved_dialog_ = false;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Don't Save", ImVec2(120, 0))) {
+      doc_man_->CloseDocument();
+      ImGui::CloseCurrentPopup();
+      show_unsaved_dialog_ = false;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+      ImGui::CloseCurrentPopup();
+      show_unsaved_dialog_ = false;
+    }
+    ImGui::EndPopup();
+  }
+}
 
 }  // namespace linea_ona

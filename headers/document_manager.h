@@ -15,59 +15,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
- * File: app.h
+ * File: document_manager.h
  * Created by kureii on 8/11/24
  */
 #pragma once
 
-#include "document.h"
-#include "imgui.h"
-#include <SDL3/SDL.h>
+#include <cstdint>
+#include <optional>
 #include <vector>
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-#include <SDL3/SDL_opengles2.h>
-#else
-#include <SDL3/SDL_opengl.h>
-#endif
+
+#include "document.h"
 
 namespace linea_one {
 
-class App {
+class DocumentManager {
 public:
-  App();
-  ~App();
-
-  bool Init();
-  void Run();
-private:
-  void ProccessEvents();
-  void Update();
-  void Render();
-
-  bool CreateWindow();
-  bool CreateRenderer();
-
-  void SetupImGui();
-
-  void RenderMenu();
-  void RenderContent();
-
-  void RenderTabs();
-  void RenderTabContent(const Document& doc);
+  DocumentManager();
   void CreateNewDocument();
-  void CloseDocument(int index);
-
-  void HandleShortcuts();
-
-  SDL_Window* p_window_;
-  SDL_Renderer* p_renderer_;
-  bool stop_;
-  bool new_doc_finised_;
-  bool close_doc_finised_;
-  ImVec4 clear_color_;
+  /*Never call this function before "CloseDocumentWithCheck" */
+  void CloseDocument();
+  int32_t CloseDocumentWithCheck(int32_t const index);
+  Document* GetCurrentDocument();
+  [[nodiscard]] int32_t DocumentSize() const;
+  [[nodiscard]] Document& GetSpecificDocument(int32_t const index);
+  [[nodiscard]] int32_t GetCurrentDocumentIndex() const;
+  [[nodiscard]] int32_t GetDocToClose() const;
+  void SetCurrentDocumentIndex(int32_t const index);
+  void SetDocToClose(int32_t const index);
+private:
   std::vector<Document> documents_;
-  int current_document_ = -1;
-  int new_doc_counter = 1;
+  uint64_t new_doc_counter = 0;
+  int32_t current_document_ = -1;
+  int32_t doc_to_close_ = -1;
 };
 
-} // linea_ona
+} // linea_one

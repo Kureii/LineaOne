@@ -26,6 +26,7 @@ namespace linea_one {
 
 struct Document {
   std::string name;
+  bool saved;
 };
 
 }
