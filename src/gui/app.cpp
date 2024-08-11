@@ -31,6 +31,8 @@ App::App()
     : p_window_(nullptr),
       p_renderer_(nullptr),
       stop_(false),
+      new_doc_finised_(false),
+      close_doc_finised_(false),
       clear_color_(0.45f, 0.55f, 0.6f, 1.0f) {}
 
 App::~App() {
@@ -59,7 +61,6 @@ bool App::Init() {
   }
 
   SetupImGui();
-  io_ = ImGui::GetIO();
   return true;
 }
 
@@ -280,16 +281,24 @@ void App::CloseDocument(int index) {
 }
 
 void App::HandleShortcuts() {
-  ImGuiIO& io = ImGui::GetIO();
+  ImGuiIO const& io = ImGui::GetIO();
   if (io.KeyCtrl) {
-    if (ImGui::IsKeyPressed(ImGuiKey_N)) {
+    if (ImGui::IsKeyPressed(ImGuiKey_N) && !new_doc_finised_) {
       CreateNewDocument();
+      new_doc_finised_ = true;
     }
-    if (ImGui::IsKeyPressed(ImGuiKey_W)) {
+    if (ImGui::IsKeyPressed(ImGuiKey_W) && !close_doc_finised_) {
       if (current_document_ >= 0 && current_document_ < documents_.size()) {
         CloseDocument(current_document_);
+        close_doc_finised_ = true;
       }
     }
+  }
+  if (ImGui::IsKeyReleased(ImGuiKey_N) || ImGui::IsKeyReleased(ImGuiKey_LeftCtrl) || ImGui::IsKeyReleased(ImGuiKey_RightCtrl)) {
+    new_doc_finised_ = false;
+  }
+  if (ImGui::IsKeyReleased(ImGuiKey_W) || ImGui::IsKeyReleased(ImGuiKey_LeftCtrl) || ImGui::IsKeyReleased(ImGuiKey_RightCtrl)) {
+    close_doc_finised_= false;
   }
 }
 

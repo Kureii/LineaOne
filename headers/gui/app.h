@@ -62,9 +62,10 @@ private:
   SDL_Window* p_window_;
   SDL_Renderer* p_renderer_;
   bool stop_;
+  bool new_doc_finised_;
+  bool close_doc_finised_;
   ImVec4 clear_color_;
   std::vector<Document> documents_;
-  ImGuiIO io_;
   int current_document_ = -1;
   int new_doc_counter = 1;
 };
