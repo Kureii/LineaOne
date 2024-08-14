@@ -26,12 +26,13 @@ namespace linea_one {
 
 Renderer::Renderer(const std::shared_ptr<SDL_Window>& p_window,
                    const std::shared_ptr<DocumentManager>& doc_man)
-    : p_window_(p_window), doc_man_(doc_man) {}
+    : p_window_(p_window), p_doc_man_(doc_man) {
+  p_ui_man_ = std::make_shared<UiManager>(p_doc_man_);
+}
 
 Renderer::~Renderer() {
   if (p_renderer_ != nullptr) {
     ImGui_ImplSDLRenderer3_Shutdown();
-
   }
 }
 
@@ -45,11 +46,10 @@ bool Renderer::Init() {
     SDL_Log("Error: SDL_CreateRenderer(): %s\n", SDL_GetError());
     return false;
   }
-  std::cout << p_renderer_.get() << std::endl;
   return true;
 }
 
-bool Renderer::Render() {
+void Renderer::Render() const {
   ImGui::SetNextWindowPos(ImVec2(0, 0));
   ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
   ImGui::Begin("Fullscreen Window", nullptr,
@@ -57,8 +57,8 @@ bool Renderer::Render() {
                    ImGuiWindowFlags_NoResize |
                    ImGuiWindowFlags_NoBringToFrontOnFocus |
                    ImGuiWindowFlags_MenuBar);
-  bool stop = RenderMenu();
-  RenderContent();
+  p_ui_man_->RenderMenu();
+  p_ui_man_->RenderContent();
 
   ImGui::End();
 
@@ -69,112 +69,18 @@ bool Renderer::Render() {
                                         p_renderer_.get());
   SDL_RenderPresent(p_renderer_.get());
 
-  return stop;
 }
 
-bool Renderer::RenderMenu() {
-  if (ImGui::BeginMenuBar()) {
-    if (ImGui::BeginMenu("File")) {
-      if (ImGui::MenuItem("New file", "Ctrl+N")) {
-        doc_man_->CreateNewDocument();
-      }
-      if (ImGui::MenuItem("Open file")) { /* TODO: Implement */
-      }
-      if (ImGui::MenuItem("Save")) { /* TODO: Implement */
-      }
-      if (ImGui::MenuItem("Save as")) { /* TODO: Implement */
-      }
-      if (ImGui::MenuItem("Close file", "Ctrl+W")) {
-        if (doc_man_->CloseDocumentWithCheck(doc_man_->GetCurrentDocumentIndex()) >= 0) {
-          show_unsaved_dialog_ = true;
-        }
-      }
-      if (ImGui::MenuItem("Exit")) {
-        return true;
-      }
-      ImGui::EndMenu();
-    }
-    ImGui::EndMenuBar();
-  }
-  return false;
-}
-
-void Renderer::RenderContent() {
-  RenderTabs();
-  if (auto current_document = doc_man_->GetCurrentDocument()) {
-    RenderTabContent(*current_document);
-  }
-
-  if (show_unsaved_dialog_) {
-    RenderUnsavedChangesDialog();
-  }
-}
-
-void Renderer::RenderTabs() {
-  if (ImGui::BeginTabBar("DocumentTabs", ImGuiTabBarFlags_AutoSelectNewTabs)) {
-    for (uint32_t i = 0; i < doc_man_->DocumentSize(); ++i) {
-      bool open = true;
-      if (ImGui::BeginTabItem(doc_man_->GetSpecificDocument(i).name.c_str(), &open, ImGuiTabItemFlags_None)) {
-        doc_man_->SetCurrentDocumentIndex(i);
-        ImGui::EndTabItem();
-      }
-      if (!open) {
-        auto index_to_close = doc_man_->CloseDocumentWithCheck(i);
-        if (index_to_close == -1) {
-          i--;
-        }
-        if (index_to_close > -1) {
-          show_unsaved_dialog_ = true;
-        }
-      }
-    }
-    if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-      doc_man_->CreateNewDocument();
-    }
-    ImGui::EndTabBar();
-  }
-}
-
-void Renderer::RenderTabContent(const Document& doc) {
-  ImGui::Text("Content of document: %s", doc.name.c_str());
-}
-
-void Renderer::RenderUnsavedChangesDialog() {
-  ImGui::OpenPopup("Unsaved Changes");
-
-  if (ImGui::BeginPopupModal("Unsaved Changes", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-    ImGui::Text("Document '%s' has unsaved changes. Do you want to save before closing?",
-                doc_man_->GetSpecificDocument(doc_man_->GetDocToClose()).name.c_str());
-    ImGui::Separator();
-
-    if (ImGui::Button("Save", ImVec2(120, 0))) {
-      /* TODO save function */
-      doc_man_->GetSpecificDocument(doc_man_->GetDocToClose()).saved = true;
-      doc_man_->CloseDocument();
-      ImGui::CloseCurrentPopup();
-      show_unsaved_dialog_ = false;
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Don't Save", ImVec2(120, 0))) {
-      doc_man_->CloseDocument();
-      ImGui::CloseCurrentPopup();
-      show_unsaved_dialog_ = false;
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Cancel", ImVec2(120, 0))) {
-      ImGui::CloseCurrentPopup();
-      show_unsaved_dialog_ = false;
-    }
-    ImGui::EndPopup();
-  }
-}
-
-void Renderer::SetShowUnsavedDialog(const bool show_unsaved_dialog) {
-  show_unsaved_dialog_ = show_unsaved_dialog;
+void Renderer::SetShowUnsavedDialog(const bool show_unsaved_dialog) const {
+  p_ui_man_->SetShowUnsavedDialog(show_unsaved_dialog);
 }
 
 std::shared_ptr<SDL_Renderer> Renderer::GetSdlRenderer() {
   return p_renderer_;
+}
+
+[[nodiscard]] bool Renderer::GetStopRendering() const {
+  return p_ui_man_->GetStopRendering();
 }
 
 }  // namespace linea_one

@@ -23,6 +23,7 @@
 #include <SDL3/SDL.h>
 #include <document.h>
 #include <document_manager.h>
+#include <ui_manager.h>
 
 #include <memory>
 
@@ -32,21 +33,18 @@ class Renderer {
 public:
  Renderer(const std::shared_ptr<SDL_Window>& p_window,
           const std::shared_ptr<DocumentManager>& doc_man);
- ~Renderer();
+ ~ Renderer();
  bool Init();
- bool Render();
- void SetShowUnsavedDialog(const bool show_unsaved_dialog);
+ void Render() const;
+ void SetShowUnsavedDialog(const bool show_unsaved_dialog) const;
 [[nodiscard]] std::shared_ptr<SDL_Renderer> GetSdlRenderer();
+[[nodiscard]] bool GetStopRendering() const;
 
 private:
- bool RenderMenu();
- void RenderContent();
- void RenderTabs();
- void RenderTabContent(const Document& doc);
- void RenderUnsavedChangesDialog();
  std::shared_ptr<SDL_Window> p_window_;
  std::shared_ptr<SDL_Renderer> p_renderer_;
- std::shared_ptr<DocumentManager> doc_man_;
+ std::shared_ptr<DocumentManager> p_doc_man_;
+ std::shared_ptr<UiManager> p_ui_man_;
  bool show_unsaved_dialog_ = false;
 
 };

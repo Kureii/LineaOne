@@ -4,5 +4,6 @@ set(headers
     headers/document_manager.h
     headers/input_manager.h
     headers/renderer.h
+    headers/ui_manager.h
 )
 

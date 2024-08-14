@@ -46,7 +46,7 @@ App::~App() {
 bool App::Init() {
   // Setup SDL
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMEPAD) != 0) {
-    std::cout << "Error: SDL_Init(): " << SDL_GetError() << std::endl;
+    std::cerr << "Error: SDL_Init(): " << SDL_GetError() << std::endl;
     return false;
   }
 
@@ -79,6 +79,8 @@ void App::Run() {
     }
     Update();
     p_renderer_->Render();
+
+    stop_ |= p_renderer_->GetStopRendering();
   }
 }
 
@@ -96,7 +98,7 @@ bool App::CreateWindow() {
   p_window_ = std::shared_ptr<SDL_Window>(SDL_CreateWindow("LeneaOne",
                                      1280, 720, window_flags), SDL_DestroyWindow);
   if (p_window_ == nullptr) {
-    std::cout << "Error: SDL_CreateWindow(): " << SDL_GetError() << std::endl;
+    std::cerr << "Error: SDL_CreateWindow(): " << SDL_GetError() << std::endl;
     return false;
   }
   SDL_SetWindowPosition(p_window_.get(), SDL_WINDOWPOS_CENTERED,
@@ -105,7 +107,7 @@ bool App::CreateWindow() {
   return true;
 }
 
-void App::SetupImGui() {
+void App::SetupImGui() const {
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO& io = ImGui::GetIO();

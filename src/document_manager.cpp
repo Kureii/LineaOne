@@ -27,7 +27,6 @@ namespace linea_one {
 DocumentManager::DocumentManager() { documents_ = std::vector<Document>(); }
 
 void DocumentManager::CreateNewDocument() {
-  std::cout << "new document" << std::endl;
   new_doc_counter++;
   Document new_doc = {std::format("New Document {}", new_doc_counter), false};
   documents_.push_back(new_doc);

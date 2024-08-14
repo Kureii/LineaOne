@@ -15,52 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
- * File: app.h
- * Created by kureii on 8/11/24
+ * File: ui_manager.h
+ * Created by kureii on 8/14/24
  */
 #pragma once
-
-#include <SDL3/SDL.h>
-#include <input_manager.h>
-
-#include <memory>
-#include <renderer.h>
-
 #include <document.h>
 #include <document_manager.h>
-#include "imgui.h"
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-#include <SDL3/SDL_opengles2.h>
-#else
-#include <SDL3/SDL_opengl.h>
-#endif
+
+#include <memory>
 
 namespace linea_one {
 
-class App {
+class UiManager {
 public:
-  App();
-  ~App();
+ UiManager(const std::shared_ptr<DocumentManager>& p_doc_man);
+ void RenderMenu();
+ void RenderContent();
+ void RenderTabs();
+ void RenderTabContent(Document& doc);
+ void RenderUnsavedChangesDialog();
+ void SetShowUnsavedDialog(const bool show_unsaved_dialog);
+ [[nodiscard]] bool GetStopRendering() const;
+ void SetStopRendering(const bool stop_rendering);
 
-  bool Init();
-  void Run();
 private:
-  static void Update();
-
-  bool CreateWindow();
-
-  void SetupImGui() const;
-
-  bool stop_;
-  std::shared_ptr<SDL_Window> p_window_;
-  ImVec4 clear_color_;
-  std::shared_ptr<DocumentManager> p_doc_man_;
-  std::shared_ptr<Renderer> p_renderer_;
-  std::unique_ptr<InputManager> p_input_man_;
-
-  bool new_doc_finised_ = false;
-  bool close_doc_finised_ = false;
-  int new_doc_counter = 1;
+ std::shared_ptr<DocumentManager> p_doc_man_;
+ bool show_unsaved_dialog_ = false;
+ bool stop_rendering_ = false;
 };
 
-} // linea_ona
+} // linea_one
