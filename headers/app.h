@@ -26,9 +26,8 @@
 #include <memory>
 #include <renderer.h>
 
-#include <document.h>
 #include <document_manager.h>
-#include "imgui.h"
+#include <imgui.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL3/SDL_opengles2.h>
 #else

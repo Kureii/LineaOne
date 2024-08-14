@@ -21,10 +21,9 @@
 #pragma once
 
 #include <cstdint>
-#include <optional>
 #include <vector>
 
-#include "document.h"
+#include <document.h>
 
 namespace linea_one {
 

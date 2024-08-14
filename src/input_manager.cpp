@@ -19,12 +19,12 @@
  * Created by kureii on 8/11/24
  */
 
-#include "input_manager.h"
+#include <input_manager.h>
 
 #include <SDL3/SDL_events.h>
 #include <imgui_impl_sdl3.h>
 
-#include "imgui.h"
+#include <imgui.h>
 
 namespace linea_one {
 InputManager::InputManager(std::shared_ptr<DocumentManager> doc_man)

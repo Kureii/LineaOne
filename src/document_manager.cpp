@@ -18,7 +18,7 @@
  * File: document_manager.cpp
  * Created by kureii on 8/11/24
  */
-#include "document_manager.h"
+#include <document_manager.h>
 
 #include <format>
 
