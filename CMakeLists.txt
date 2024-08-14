@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.29.6)
 
 project(
         LineaOne
         VERSION 0.0.1
-        DESCRIPTION Specialized software for creating timelines for presentations.
         LANGUAGES CXX
 )
 
