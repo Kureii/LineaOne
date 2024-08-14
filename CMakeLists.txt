@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.26)
 project(
         LineaOne
         VERSION 0.0.1
+        DESCRIPTION Specialized software for creating timelines for presentations.
         LANGUAGES CXX
 )
 
@@ -20,6 +21,16 @@ configure_file(
 )
 
 add_compile_options(-g -Wall -Wformat)
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    add_compile_options(-O0 -g)
+elseif(CMAKE_BUILD_TYPE MATCHES Release)
+    add_compile_options(-O3)
+elseif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+    add_compile_options(-O2 -g)
+elseif(CMAKE_BUILD_TYPE MATCHES MinSizeRel)
+    add_compile_options(-Os)
+endif()
 
 if(UNIX AND NOT APPLE)
     message(STATUS "Configuring for Linux")
