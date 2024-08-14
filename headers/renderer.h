@@ -20,12 +20,13 @@
  */
 #pragma once
 
-#include <SDL3/SDL.h>
-#include <document.h>
-#include <document_manager.h>
-#include <ui_manager.h>
-
 #include <memory>
+
+#include <SDL3/SDL.h>
+
+#include <document_manager.h>
+#include <ui/ui_manager.h>
+
 
 namespace linea_one {
 
@@ -33,7 +34,6 @@ class Renderer {
 public:
  Renderer(const std::shared_ptr<SDL_Window>& p_window,
           const std::shared_ptr<DocumentManager>& doc_man);
- ~ Renderer();
  bool Init();
  void Render() const;
  void SetShowUnsavedDialog(const bool show_unsaved_dialog) const;

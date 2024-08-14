@@ -18,7 +18,7 @@
  * File: ui_manager.cpp
  * Created by kureii on 8/14/24
  */
-#include "ui_manager.h"
+#include <ui/ui_manager.h>
 
 #include <SDL3/SDL_render.h>
 #include <imgui.h>
