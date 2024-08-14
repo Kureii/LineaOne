@@ -3,5 +3,6 @@ set(headers
     headers/document.h
     headers/document_manager.h
     headers/input_manager.h
+    headers/renderer.h
 )
 

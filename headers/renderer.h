@@ -15,52 +15,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
- * File: app.h
- * Created by kureii on 8/11/24
+ * File: renderer.h
+ * Created by kureii on 8/14/24
  */
 #pragma once
 
 #include <SDL3/SDL.h>
-#include <input_manager.h>
-
-#include <memory>
-#include <renderer.h>
-
 #include <document.h>
 #include <document_manager.h>
-#include "imgui.h"
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-#include <SDL3/SDL_opengles2.h>
-#else
-#include <SDL3/SDL_opengl.h>
-#endif
+
+#include <memory>
 
 namespace linea_one {
 
-class App {
+class Renderer {
 public:
-  App();
-  ~App();
+ Renderer(const std::shared_ptr<SDL_Window>& p_window,
+          const std::shared_ptr<DocumentManager>& doc_man);
+ ~Renderer();
+ bool Init();
+ bool Render();
+ void SetShowUnsavedDialog(const bool show_unsaved_dialog);
+[[nodiscard]] std::shared_ptr<SDL_Renderer> GetSdlRenderer();
 
-  bool Init();
-  void Run();
 private:
-  void Update();
+ bool RenderMenu();
+ void RenderContent();
+ void RenderTabs();
+ void RenderTabContent(const Document& doc);
+ void RenderUnsavedChangesDialog();
+ std::shared_ptr<SDL_Window> p_window_;
+ std::shared_ptr<SDL_Renderer> p_renderer_;
+ std::shared_ptr<DocumentManager> doc_man_;
+ bool show_unsaved_dialog_ = false;
 
-  bool CreateWindow();
-
-  void SetupImGui();
-
-  bool stop_;
-  std::shared_ptr<SDL_Window> p_window_;
-  ImVec4 clear_color_;
-  std::shared_ptr<DocumentManager> p_doc_man_;
-  std::shared_ptr<Renderer> p_renderer_;
-  std::unique_ptr<InputManager> p_input_man_;
-
-  bool new_doc_finised_ = false;
-  bool close_doc_finised_ = false;
-  int new_doc_counter = 1;
 };
 
-} // linea_ona
+} // linea_one

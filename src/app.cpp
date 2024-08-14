@@ -28,21 +28,18 @@
 
 namespace linea_one {
 App::App()
-    : p_window_(nullptr),
-      p_renderer_(nullptr),
-      stop_(false),
+    : stop_(false),
       clear_color_(0.45f, 0.55f, 0.6f, 1.0f) {
-  doc_man_ = std::make_shared<DocumentManager>();
-  input_man_ = std::make_unique<InputManager>(doc_man_);
+  p_doc_man_ = std::make_shared<DocumentManager>();
+  p_input_man_ = std::make_unique<InputManager>(p_doc_man_);
 }
 
 App::~App() {
-  ImGui_ImplSDLRenderer3_Shutdown();
+  if (p_renderer_ != nullptr) {
+    ImGui_ImplSDLRenderer3_Shutdown();
+  }
   ImGui_ImplSDL3_Shutdown();
   ImGui::DestroyContext();
-
-  SDL_DestroyRenderer(p_renderer_);
-  SDL_DestroyWindow(p_window_);
   SDL_Quit();
 }
 
@@ -56,8 +53,8 @@ bool App::Init() {
   if (!CreateWindow()) {
     return false;
   }
-
-  if (!CreateRenderer()) {
+  p_renderer_ = std::make_shared<Renderer>(p_window_, p_doc_man_);
+  if (!p_renderer_->Init()) {
     return false;
   }
 
@@ -76,12 +73,12 @@ void App::Run() {
   while (!stop_)
 #endif
   {
-    stop_ = input_man_->HandleEvents(p_window_);
-    if (input_man_->HandleShortcuts() == ASCII_W) {
-      show_unsaved_dialog_ = true;
+    stop_ = p_input_man_->HandleEvents(p_window_.get());
+    if (p_input_man_->HandleShortcuts() == ASCII_W) {
+      p_renderer_->SetShowUnsavedDialog(true);
     }
     Update();
-    Render();
+    p_renderer_->Render();
   }
 }
 
@@ -91,89 +88,20 @@ void App::Update() {
   ImGui::NewFrame();
 }
 
-void App::Render() {
-  ImGui::SetNextWindowPos(ImVec2(0, 0));
-  ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
-  ImGui::Begin("Fullscreen Window", nullptr,
-               ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
-                   ImGuiWindowFlags_NoResize |
-                   ImGuiWindowFlags_NoBringToFrontOnFocus |
-                   ImGuiWindowFlags_MenuBar);
-
-  RenderMenu();
-  RenderContent();
-
-  ImGui::End();
-
-  ImGui::Render();
-  SDL_SetRenderDrawColor(p_renderer_, 0, 0, 0, 255);
-  SDL_RenderClear(p_renderer_);
-  ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(),
-                                        p_renderer_);
-  SDL_RenderPresent(p_renderer_);
-}
-
-void App::RenderMenu() {
-  if (ImGui::BeginMenuBar()) {
-    if (ImGui::BeginMenu("File")) {
-      if (ImGui::MenuItem("New file", "Ctrl+N")) {
-        doc_man_->CreateNewDocument();
-      }
-      if (ImGui::MenuItem("Open file")) { /* TODO: Implement */
-      }
-      if (ImGui::MenuItem("Save")) { /* TODO: Implement */
-      }
-      if (ImGui::MenuItem("Save as")) { /* TODO: Implement */
-      }
-      if (ImGui::MenuItem("Close file", "Ctrl+W")) {
-        if (doc_man_->CloseDocumentWithCheck(doc_man_->GetCurrentDocumentIndex()) >= 0) {
-          show_unsaved_dialog_ = true;
-        }
-      }
-      if (ImGui::MenuItem("Exit")) {
-        stop_ = true;
-      }
-      ImGui::EndMenu();
-    }
-    ImGui::EndMenuBar();
-  }
-}
-
-void App::RenderContent() {
-  RenderTabs();
-  if (auto current_document = doc_man_->GetCurrentDocument()) {
-    RenderTabContent(*current_document);
-  }
-
-  if (show_unsaved_dialog_) {
-    RenderUnsavedChangesDialog();
-  }
-}
-
 bool App::CreateWindow() {
   // Create window with SDL_Renderer graphics context
   Uint32 window_flags =
       SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;
-  p_window_ = SDL_CreateWindow("LeneaOne",
-                                     1280, 720, window_flags);
+
+  p_window_ = std::shared_ptr<SDL_Window>(SDL_CreateWindow("LeneaOne",
+                                     1280, 720, window_flags), SDL_DestroyWindow);
   if (p_window_ == nullptr) {
     std::cout << "Error: SDL_CreateWindow(): " << SDL_GetError() << std::endl;
     return false;
   }
-  SDL_SetWindowPosition(p_window_, SDL_WINDOWPOS_CENTERED,
+  SDL_SetWindowPosition(p_window_.get(), SDL_WINDOWPOS_CENTERED,
                         SDL_WINDOWPOS_CENTERED);
-  SDL_ShowWindow(p_window_);
-  return true;
-}
-
-bool App::CreateRenderer() {
-  p_renderer_= SDL_CreateRenderer(p_window_, nullptr);
-  SDL_SetRenderVSync(p_renderer_, 1);
-  if (p_renderer_ == nullptr) {
-    SDL_Log("Error: SDL_CreateRenderer(): %s\n", SDL_GetError());
-    return false;
-  }
-
+  SDL_ShowWindow(p_window_.get());
   return true;
 }
 
@@ -193,8 +121,8 @@ void App::SetupImGui() {
   // ImGui::StyleColorsLight();
 
   // Setup Platform/Renderer backends
-  ImGui_ImplSDL3_InitForSDLRenderer(p_window_, p_renderer_);
-  ImGui_ImplSDLRenderer3_Init(p_renderer_);
+  ImGui_ImplSDL3_InitForSDLRenderer(p_window_.get(), p_renderer_->GetSdlRenderer().get());
+  ImGui_ImplSDLRenderer3_Init(p_renderer_->GetSdlRenderer().get());
 
   // Load Fonts
   // - If no fonts are loaded, dear imgui will use the default font. You can
@@ -223,65 +151,6 @@ void App::SetupImGui() {
   // ImFont* font =
   // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f,
   // nullptr, io.Fonts->GetGlyphRangesJapanese()); IM_ASSERT(font != nullptr);
-}
-
-void App::RenderTabs() {
-  if (ImGui::BeginTabBar("DocumentTabs", ImGuiTabBarFlags_AutoSelectNewTabs)) {
-    for (uint32_t i = 0; i < doc_man_->DocumentSize(); ++i) {
-      bool open = true;
-      if (ImGui::BeginTabItem(doc_man_->GetSpecificDocument(i).name.c_str(), &open, ImGuiTabItemFlags_None)) {
-        doc_man_->SetCurrentDocumentIndex(i);
-        ImGui::EndTabItem();
-      }
-      if (!open) {
-        auto index_to_close = doc_man_->CloseDocumentWithCheck(i);
-        if (index_to_close == -1) {
-          i--;
-        }
-        if (index_to_close > -1) {
-          show_unsaved_dialog_ = true;
-        }
-      }
-    }
-    if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-      doc_man_->CreateNewDocument();
-    }
-    ImGui::EndTabBar();
-  }
-}
-
-void App::RenderTabContent(const Document& doc) {
-  ImGui::Text("Content of document: %s", doc.name.c_str());
-}
-
-void App::RenderUnsavedChangesDialog() {
-  ImGui::OpenPopup("Unsaved Changes");
-
-  if (ImGui::BeginPopupModal("Unsaved Changes", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-    ImGui::Text("Document '%s' has unsaved changes. Do you want to save before closing?",
-                doc_man_->GetSpecificDocument(doc_man_->GetDocToClose()).name.c_str());
-    ImGui::Separator();
-
-    if (ImGui::Button("Save", ImVec2(120, 0))) {
-      /* TODO save function */
-      doc_man_->GetSpecificDocument(doc_man_->GetDocToClose()).saved = true;
-      doc_man_->CloseDocument();
-      ImGui::CloseCurrentPopup();
-      show_unsaved_dialog_ = false;
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Don't Save", ImVec2(120, 0))) {
-      doc_man_->CloseDocument();
-      ImGui::CloseCurrentPopup();
-      show_unsaved_dialog_ = false;
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Cancel", ImVec2(120, 0))) {
-      ImGui::CloseCurrentPopup();
-      show_unsaved_dialog_ = false;
-    }
-    ImGui::EndPopup();
-  }
 }
 
 }  // namespace linea_ona
