@@ -35,7 +35,7 @@ App::App()
 }
 
 App::~App() {
-  ImGui_ImplSDLRenderer3_Shutdown();  // Přidej sem, pokud není v Rendererovi.
+  ImGui_ImplSDLRenderer3_Shutdown();
   ImGui_ImplSDL3_Shutdown();
   ImGui::DestroyContext();
   SDL_Quit();
@@ -102,6 +102,9 @@ bool App::CreateWindow() {
   SDL_SetWindowPosition(p_window_.get(), SDL_WINDOWPOS_CENTERED,
                         SDL_WINDOWPOS_CENTERED);
   SDL_ShowWindow(p_window_.get());
+
+  SDL_SetWindowMinimumSize(p_window_.get(), 960, 720);
+
   return true;
 }
 
