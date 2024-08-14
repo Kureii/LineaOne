@@ -12,20 +12,27 @@ include(cmake/headers.cmake)
 include(cmake/lib.cmake)
 include(cmake/source.cmake)
 
+message(STATUS "Started CMake for ${PROJECT_NAME} v${PROJECT_VERSION}...")
+
+configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.h.in
+        ${CMAKE_CURRENT_BINARY_DIR}/src/config.h
+)
+
 add_compile_options(-g -Wall -Wformat)
 
 if(UNIX AND NOT APPLE)
-    message("Configuring for Linux")
+    message(STATUS "Configuring for Linux")
     find_package(SDL3 REQUIRED)
     list(APPEND LIBS dl GL ${SDL3_LIBRARIES})
     include_directories(${SDL3_INCLUDE_DIRS})
 elseif(APPLE)
-    message("Configuring for Mac OS X")
+    message(STATUS "Configuring for Mac OS X")
     find_package(SDL3 REQUIRED)
     list(APPEND LIBS ${SDL3_LIBRARIES} "-framework OpenGL" "-framework Cocoa" "-framework IOKit" "-framework CoreVideo")
     include_directories(${SDL3_INCLUDE_DIRS} /usr/local/include /opt/local/include)
 elseif(WIN32)
-    message("Configuring for Windows")
+    message(STATUS "Configuring for Windows")
     find_package(SDL3 REQUIRED)
     list(APPEND LIBS gdi32 opengl32 imm32 ${SDL3_LIBRARIES})
     include_directories(${SDL3_INCLUDE_DIRS})
@@ -40,6 +47,8 @@ include_directories(${PROJECT_NAME}
         ${IMGUI_DIR}
         ${IMGUI_DIR}/backends
 )
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(${PROJECT_NAME} ${LIBS})
 
