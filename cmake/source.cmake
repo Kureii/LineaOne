@@ -4,6 +4,7 @@ set(sources
     src/input_manager.cpp
     src/renderer.cpp
     src/ui/ui_manager.cpp
+    src/ui/ui_main_menu.cpp
 )
 
 set(exe_sources

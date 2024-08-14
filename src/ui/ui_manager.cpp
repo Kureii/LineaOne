@@ -18,39 +18,21 @@
  * File: ui_manager.cpp
  * Created by kureii on 8/14/24
  */
-#include <ui/ui_manager.h>
-
 #include <SDL3/SDL_render.h>
 #include <imgui.h>
+#include <ui/ui_manager.h>
 
-namespace linea_one {
+namespace linea_one::ui {
 
-UiManager::UiManager(const std::shared_ptr<DocumentManager>& p_doc_man) : p_doc_man_(p_doc_man) {}
+UiManager::UiManager(const std::shared_ptr<DocumentManager>& p_doc_man)
+    : p_doc_man_(p_doc_man) {
+  p_main_menu_ = std::make_unique<UiMainMenu>(p_doc_man_);
+}
 
 void UiManager::RenderMenu() {
-  if (ImGui::BeginMenuBar()) {
-    if (ImGui::BeginMenu("File")) {
-      if (ImGui::MenuItem("New file", "Ctrl+N")) {
-        p_doc_man_->CreateNewDocument();
-      }
-      if (ImGui::MenuItem("Open file")) { /* TODO: Implement */
-      }
-      if (ImGui::MenuItem("Save")) { /* TODO: Implement */
-      }
-      if (ImGui::MenuItem("Save as")) { /* TODO: Implement */
-      }
-      if (ImGui::MenuItem("Close file", "Ctrl+W")) {
-        if (p_doc_man_->CloseDocumentWithCheck(p_doc_man_->GetCurrentDocumentIndex()) >= 0) {
-          show_unsaved_dialog_ = true;
-        }
-      }
-      if (ImGui::MenuItem("Exit")) {
-        stop_rendering_ = true;
-      }
-      ImGui::EndMenu();
-    }
-    ImGui::EndMenuBar();
-  }
+  p_main_menu_->Render();
+  show_unsaved_dialog_ |= p_main_menu_->IsShowUnsavedDialog();
+  stop_rendering_ |= p_main_menu_->IsStopRendering();
 }
 
 void UiManager::RenderContent() {
@@ -68,7 +50,8 @@ void UiManager::RenderTabs() {
   if (ImGui::BeginTabBar("DocumentTabs", ImGuiTabBarFlags_AutoSelectNewTabs)) {
     for (int32_t i = 0; i < p_doc_man_->DocumentSize(); ++i) {
       bool open = true;
-      if (ImGui::BeginTabItem(p_doc_man_->GetSpecificDocument(i).name.c_str(), &open, ImGuiTabItemFlags_None)) {
+      if (ImGui::BeginTabItem(p_doc_man_->GetSpecificDocument(i).name.c_str(),
+                              &open, ImGuiTabItemFlags_None)) {
         p_doc_man_->SetCurrentDocumentIndex(i);
         ImGui::EndTabItem();
       }
@@ -82,7 +65,8 @@ void UiManager::RenderTabs() {
         }
       }
     }
-    if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
+    if (ImGui::TabItemButton(
+            "+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
       p_doc_man_->CreateNewDocument();
     }
     ImGui::EndTabBar();
@@ -96,9 +80,13 @@ void UiManager::RenderTabContent(Document& doc) {
 void UiManager::RenderUnsavedChangesDialog() {
   ImGui::OpenPopup("Unsaved Changes");
 
-  if (ImGui::BeginPopupModal("Unsaved Changes", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-    ImGui::Text("Document '%s' has unsaved changes. Do you want to save before closing?",
-                p_doc_man_->GetSpecificDocument(p_doc_man_->GetDocToClose()).name.c_str());
+  if (ImGui::BeginPopupModal("Unsaved Changes", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    ImGui::Text(
+        "Document '%s' has unsaved changes. Do you want to save before "
+        "closing?",
+        p_doc_man_->GetSpecificDocument(p_doc_man_->GetDocToClose())
+            .name.c_str());
     ImGui::Separator();
 
     if (ImGui::Button("Save", ImVec2(120, 0))) {
@@ -107,17 +95,20 @@ void UiManager::RenderUnsavedChangesDialog() {
       p_doc_man_->CloseDocument();
       ImGui::CloseCurrentPopup();
       show_unsaved_dialog_ = false;
+      p_main_menu_->SetShowUnsavedDialog(show_unsaved_dialog_);
     }
     ImGui::SameLine();
     if (ImGui::Button("Don't Save", ImVec2(120, 0))) {
       p_doc_man_->CloseDocument();
       ImGui::CloseCurrentPopup();
       show_unsaved_dialog_ = false;
+      p_main_menu_->SetShowUnsavedDialog(show_unsaved_dialog_);
     }
     ImGui::SameLine();
     if (ImGui::Button("Cancel", ImVec2(120, 0))) {
       ImGui::CloseCurrentPopup();
       show_unsaved_dialog_ = false;
+      p_main_menu_->SetShowUnsavedDialog(show_unsaved_dialog_);
     }
     ImGui::EndPopup();
   }
@@ -134,4 +125,4 @@ void UiManager::SetShowUnsavedDialog(const bool show_unsaved_dialog) {
 void UiManager::SetStopRendering(const bool stop_rendering) {
   stop_rendering_ = stop_rendering;
 }
-} // linea_one
+}  // namespace linea_one

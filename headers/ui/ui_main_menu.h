@@ -15,38 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
- * File: renderer.h
+ * File: ui_main_menu.h
  * Created by kureii on 8/14/24
  */
 #pragma once
+#include <document_manager.h>
 
 #include <memory>
 
-#include <SDL3/SDL.h>
+namespace linea_one::ui {
 
-#include <document_manager.h>
-#include <ui/ui_manager.h>
+class UiMainMenu {
+ public:
+  UiMainMenu(const std::shared_ptr<DocumentManager> &p_doc_man);
+  void Render();
+  [[nodiscard]] bool IsShowUnsavedDialog() const;
+  [[nodiscard]] bool IsStopRendering() const;
+  void SetShowUnsavedDialog(const bool show_unsaved_dialog);
 
-
-namespace linea_one {
-
-class Renderer {
-public:
- Renderer(const std::shared_ptr<SDL_Window>& p_window,
-          const std::shared_ptr<DocumentManager>& doc_man);
- bool Init();
- void Render() const;
- void SetShowUnsavedDialog(const bool show_unsaved_dialog) const;
-[[nodiscard]] std::shared_ptr<SDL_Renderer> GetSdlRenderer();
-[[nodiscard]] bool GetStopRendering() const;
-
-private:
- std::shared_ptr<SDL_Window> p_window_;
- std::shared_ptr<SDL_Renderer> p_renderer_;
- std::shared_ptr<DocumentManager> p_doc_man_;
- std::shared_ptr<ui::UiManager> p_ui_man_;
- bool show_unsaved_dialog_ = false;
-
+ private:
+ void NewFile() const;
+ void CloseFile();
+  std::shared_ptr<DocumentManager> p_doc_man_;
+  bool show_unsaved_dialog_ = false;
+  bool stop_rendering_ = false;
 };
 
-} // linea_one
+}  // namespace linea_one::ui

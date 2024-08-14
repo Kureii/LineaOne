@@ -5,5 +5,6 @@ set(headers
     headers/input_manager.h
     headers/renderer.h
     headers/ui/ui_manager.h
+    headers/ui/ui_main_menu.h
 )
 

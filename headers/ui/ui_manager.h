@@ -24,24 +24,27 @@
 
 #include <memory>
 
-namespace linea_one {
+#include "ui_main_menu.h"
+
+namespace linea_one::ui {
 
 class UiManager {
-public:
- UiManager(const std::shared_ptr<DocumentManager>& p_doc_man);
- void RenderMenu();
- void RenderContent();
- void RenderTabs();
- void RenderTabContent(Document& doc);
- void RenderUnsavedChangesDialog();
- void SetShowUnsavedDialog(const bool show_unsaved_dialog);
- [[nodiscard]] bool GetStopRendering() const;
- void SetStopRendering(const bool stop_rendering);
+ public:
+  UiManager(const std::shared_ptr<DocumentManager>& p_doc_man);
+  void RenderMenu();
+  void RenderContent();
+  void RenderTabs();
+  void RenderTabContent(Document& doc);
+  void RenderUnsavedChangesDialog();
+  void SetShowUnsavedDialog(const bool show_unsaved_dialog);
+  [[nodiscard]] bool GetStopRendering() const;
+  void SetStopRendering(const bool stop_rendering);
 
-private:
- std::shared_ptr<DocumentManager> p_doc_man_;
- bool show_unsaved_dialog_ = false;
- bool stop_rendering_ = false;
+ private:
+  std::shared_ptr<DocumentManager> p_doc_man_;
+  std::unique_ptr<UiMainMenu> p_main_menu_;
+  bool show_unsaved_dialog_ = false;
+  bool stop_rendering_ = false;
 };
 
-} // linea_one
+}  // namespace linea_one::ui
