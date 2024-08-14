@@ -22,14 +22,17 @@
 #include <document.h>
 
 #include <memory>
+#include <vector>
 
 namespace linea_one::ui {
 
 class UiDocumentTab {
 public:
- UiDocumentTab();
+ UiDocumentTab() = default;
 
  void Render(Document& document);
+ void RenderLeftBox(Document& document);
+ void RenderRightBox(Document& document);
 
 };
 

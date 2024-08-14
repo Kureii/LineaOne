@@ -18,17 +18,59 @@
  * File: ui_document_tab.cpp
  * Created by kureii on 8/14/24
  */
+#include <imgui.h>
 #include <ui/ui_document_tab.h>
 
-#include <imgui.h>
+#include <algorithm>
 
 namespace linea_one::ui {
 
-UiDocumentTab::UiDocumentTab() {}
-
 void UiDocumentTab::Render(Document& document) {
-  ImGui::Text("Content of document: %s", document.name.c_str());
-}
+  ImVec2 contentSize = ImGui::GetContentRegionAvail();
 
+  static float leftPanelWidth = 400.0f;
+
+  float minWidth = 400.0f;
+  float maxWidth = contentSize.x * 0.5f;
+
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.3f, 0.0f, 1.0f));
+  ImGui::BeginChild("LeftPanel", ImVec2(leftPanelWidth, contentSize.y), true);
+
+  ImGui::Text("Left panel");
+  // Left panel content
+
+  ImGui::EndChild();
+  ImGui::PopStyleColor();
+
+  // Resize slider
+  ImGui::SameLine(0, 0);
+  ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+  ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
+  ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.6f, 0.6f, 0.6f, 0.1f));
+  ImGui::Button("##Splitter", ImVec2(8.0f, contentSize.y));
+  ImGui::PopStyleColor(3);
+
+  if (ImGui::IsItemActive()) {
+    float mousePositionX = ImGui::GetIO().MousePos.x;
+    float leftPanelEdgeX = ImGui::GetItemRectMin().x;
+    leftPanelWidth = mousePositionX - ImGui::GetWindowPos().x;
+    leftPanelWidth = std::clamp(leftPanelWidth, minWidth, maxWidth);
+  }
+
+  // Cursor
+  if (ImGui::IsItemHovered() || ImGui::IsItemActive())
+    ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+
+  // Right panel
+  ImGui::SameLine(0, 0);  // Žádná mezera mezi táhlem a pravým panelem
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.3f, 1.0f));
+  ImGui::BeginChild("RightPanel", ImVec2(0, contentSize.y), true);
+
+  ImGui::Text("Right panel");
+  // Right panel content
+
+  ImGui::EndChild();
+  ImGui::PopStyleColor();
+}
 
 } // linea_one::ui

@@ -15,20 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
- * File: document.h
- * Created by kureii on 8/11/24
+ * File: timeline_event.h
+ * Created by kureii on 8/15/24
  */
 #pragma once
 
+#include <vector>
 #include <iostream>
-#include <timeline_event.h>
 
 namespace linea_one {
 
-struct Document {
-  std::string name;
-  bool saved;
-  std::vector<TimelineEvent> events;
+struct TimelineEvent {
+  int year;
+  std::string headline;
 };
 
 }
