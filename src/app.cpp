@@ -18,13 +18,13 @@
  * File: app.cpp
  * Created by kureii on 8/11/24
  */
-#include "app.h"
+#include <app.h>
 
 #include <format>
 #include <iostream>
 
-#include "imgui_impl_sdl3.h"
-#include "imgui_impl_sdlrenderer3.h"
+#include <imgui_impl_sdl3.h>
+#include <imgui_impl_sdlrenderer3.h>
 
 namespace linea_one {
 App::App()
@@ -35,9 +35,7 @@ App::App()
 }
 
 App::~App() {
-  if (p_renderer_ != nullptr) {
-    ImGui_ImplSDLRenderer3_Shutdown();
-  }
+  ImGui_ImplSDLRenderer3_Shutdown();  // Přidej sem, pokud není v Rendererovi.
   ImGui_ImplSDL3_Shutdown();
   ImGui::DestroyContext();
   SDL_Quit();

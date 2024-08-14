@@ -18,9 +18,10 @@
  * File: renderer.cpp
  * Created by kureii on 8/14/24
  */
-#include "renderer.h"
 #include <imgui.h>
+#include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlrenderer3.h>
+#include <renderer.h>
 
 namespace linea_one {
 
@@ -28,12 +29,6 @@ Renderer::Renderer(const std::shared_ptr<SDL_Window>& p_window,
                    const std::shared_ptr<DocumentManager>& doc_man)
     : p_window_(p_window), p_doc_man_(doc_man) {
   p_ui_man_ = std::make_shared<UiManager>(p_doc_man_);
-}
-
-Renderer::~Renderer() {
-  if (p_renderer_ != nullptr) {
-    ImGui_ImplSDLRenderer3_Shutdown();
-  }
 }
 
 bool Renderer::Init() {
