@@ -15,38 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
- * File: ui_manager.h
+ * File: ui_document_tab.h
  * Created by kureii on 8/14/24
  */
 #pragma once
 #include <document.h>
-#include <document_manager.h>
 
 #include <memory>
 
-#include <ui/ui_document_tab.h>
-#include <ui/ui_main_menu.h>
-
 namespace linea_one::ui {
 
-class UiManager {
- public:
-  UiManager(const std::shared_ptr<DocumentManager>& p_doc_man);
-  void RenderMenu();
-  void RenderContent();
-  void RenderTabs();
-  void RenderTabContent(Document& doc) const;
-  void RenderUnsavedChangesDialog();
-  void SetShowUnsavedDialog(const bool show_unsaved_dialog);
-  [[nodiscard]] bool GetStopRendering() const;
-  void SetStopRendering(const bool stop_rendering);
+class UiDocumentTab {
+public:
+ UiDocumentTab();
 
- private:
-  std::shared_ptr<DocumentManager> p_doc_man_;
-  std::unique_ptr<UiMainMenu> p_main_menu_;
-  std::unique_ptr<UiDocumentTab> p_doc_tab_;
-  bool show_unsaved_dialog_ = false;
-  bool stop_rendering_ = false;
+ void Render(Document& document);
+
 };
 
-}  // namespace linea_one::ui
+} // linea_one::ui

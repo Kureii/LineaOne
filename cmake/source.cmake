@@ -5,6 +5,7 @@ set(sources
     src/renderer.cpp
     src/ui/ui_manager.cpp
     src/ui/ui_main_menu.cpp
+    src/ui/ui_document_tab.cpp
 )
 
 set(exe_sources
