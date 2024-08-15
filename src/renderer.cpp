@@ -54,6 +54,7 @@ void Renderer::Render() const {
                    ImGuiWindowFlags_MenuBar);
   p_ui_man_->RenderMenu();
   p_ui_man_->RenderContent();
+  p_ui_man_->SetSharedVars();
 
   ImGui::End();
 

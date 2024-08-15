@@ -6,6 +6,7 @@ set(sources
     src/ui/ui_manager.cpp
     src/ui/ui_main_menu.cpp
     src/ui/ui_document_tab.cpp
+    src/ui/ui_modal_dialogs.cpp
 )
 
 set(exe_sources

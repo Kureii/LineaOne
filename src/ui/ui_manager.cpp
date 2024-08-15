@@ -28,12 +28,14 @@ UiManager::UiManager(const std::shared_ptr<DocumentManager>& p_doc_man)
     : p_doc_man_(p_doc_man) {
   p_main_menu_ = std::make_unique<UiMainMenu>(p_doc_man_);
   p_doc_tab_ = std::make_unique<UiDocumentTab>();
+  p_modal_dialogs_ = std::make_unique<UiModalDialogs>(p_doc_man_);
 }
 
 void UiManager::RenderMenu() {
   p_main_menu_->Render();
   show_unsaved_dialog_ |= p_main_menu_->IsShowUnsavedDialog();
   stop_rendering_ |= p_main_menu_->IsStopRendering();
+  SetSharedVars();
 }
 
 void UiManager::RenderContent() {
@@ -43,7 +45,8 @@ void UiManager::RenderContent() {
   }
 
   if (show_unsaved_dialog_) {
-    RenderUnsavedChangesDialog();
+    p_modal_dialogs_->RenderUnsavedChanges();
+    show_unsaved_dialog_ = p_modal_dialogs_->GetShowUnsavedDialog();
   }
 }
 
@@ -63,6 +66,7 @@ void UiManager::RenderTabs() {
         }
         if (index_to_close > -1) {
           show_unsaved_dialog_ = true;
+          SetSharedVars();
         }
       }
     }
@@ -78,45 +82,10 @@ void UiManager::RenderTabContent(Document& doc) const {
   p_doc_tab_->Render(doc);
 }
 
-void UiManager::RenderUnsavedChangesDialog() {
-  ImGui::OpenPopup("Unsaved Changes");
-
-  if (ImGui::BeginPopupModal("Unsaved Changes", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
-    ImGui::Text(
-        "Document '%s' has unsaved changes. Do you want to save before "
-        "closing?",
-        p_doc_man_->GetSpecificDocument(p_doc_man_->GetDocToClose())
-            .name.c_str());
-    ImGui::Separator();
-
-    if (ImGui::Button("Save", ImVec2(120, 0))) {
-      /* TODO save function */
-      p_doc_man_->GetSpecificDocument(p_doc_man_->GetDocToClose()).saved = true;
-      p_doc_man_->CloseDocument();
-      ImGui::CloseCurrentPopup();
-      show_unsaved_dialog_ = false;
-      p_main_menu_->SetShowUnsavedDialog(show_unsaved_dialog_);
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Don't Save", ImVec2(120, 0))) {
-      p_doc_man_->CloseDocument();
-      ImGui::CloseCurrentPopup();
-      show_unsaved_dialog_ = false;
-      p_main_menu_->SetShowUnsavedDialog(show_unsaved_dialog_);
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Cancel", ImVec2(120, 0))) {
-      ImGui::CloseCurrentPopup();
-      show_unsaved_dialog_ = false;
-      p_main_menu_->SetShowUnsavedDialog(show_unsaved_dialog_);
-    }
-    ImGui::EndPopup();
-  }
-}
 
 void UiManager::SetShowUnsavedDialog(const bool show_unsaved_dialog) {
   show_unsaved_dialog_ = show_unsaved_dialog;
+  SetSharedVars();
 }
 
 [[nodiscard]] bool UiManager::GetStopRendering() const {
@@ -126,4 +95,11 @@ void UiManager::SetShowUnsavedDialog(const bool show_unsaved_dialog) {
 void UiManager::SetStopRendering(const bool stop_rendering) {
   stop_rendering_ = stop_rendering;
 }
+
+void UiManager::SetSharedVars() const {
+  p_main_menu_->SetShowUnsavedDialog(show_unsaved_dialog_);
+  p_modal_dialogs_->SetShowUnsavedDialog(show_unsaved_dialog_);
+
+}
+
 }  // namespace linea_one
