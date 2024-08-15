@@ -18,7 +18,7 @@
  * File: ui_document_tab.cpp
  * Created by kureii on 8/14/24
  */
-#include <imgui.h>
+
 #include <ui/ui_document_tab.h>
 
 #include <algorithm>
@@ -26,33 +26,33 @@
 namespace linea_one::ui {
 
 void UiDocumentTab::Render(Document& document) {
-  ImVec2 contentSize = ImGui::GetContentRegionAvail();
+  ImVec2 content_size = ImGui::GetContentRegionAvail();
 
   static float leftPanelWidth = 400.0f;
 
   float minWidth = 400.0f;
-  float maxWidth = contentSize.x * 0.5f;
+  float maxWidth = content_size.x * 0.5f;
+  leftPanelWidth = std::clamp(leftPanelWidth, minWidth, maxWidth);
 
-  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.3f, 0.0f, 1.0f));
-  ImGui::BeginChild("LeftPanel", ImVec2(leftPanelWidth, contentSize.y), true);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+  ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0);
 
-  ImGui::Text("Left panel");
-  // Left panel content
+  ImGui::BeginChild("LeftPanel", ImVec2(leftPanelWidth, content_size.y), true);
+
+  RenderLeftBox(document);
 
   ImGui::EndChild();
-  ImGui::PopStyleColor();
 
   // Resize slider
   ImGui::SameLine(0, 0);
   ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
   ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0));
   ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.6f, 0.6f, 0.6f, 0.1f));
-  ImGui::Button("##Splitter", ImVec2(8.0f, contentSize.y));
+  ImGui::Button("##Splitter", ImVec2(8.0f, content_size.y));
   ImGui::PopStyleColor(3);
 
   if (ImGui::IsItemActive()) {
     float mousePositionX = ImGui::GetIO().MousePos.x;
-    float leftPanelEdgeX = ImGui::GetItemRectMin().x;
     leftPanelWidth = mousePositionX - ImGui::GetWindowPos().x;
     leftPanelWidth = std::clamp(leftPanelWidth, minWidth, maxWidth);
   }
@@ -62,15 +62,43 @@ void UiDocumentTab::Render(Document& document) {
     ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
 
   // Right panel
-  ImGui::SameLine(0, 0);  // Žádná mezera mezi táhlem a pravým panelem
+  ImGui::SameLine(0, 0);
   ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.3f, 1.0f));
-  ImGui::BeginChild("RightPanel", ImVec2(0, contentSize.y), true);
+  ImGui::BeginChild("RightPanel", ImVec2(0, content_size.y), true);
 
-  ImGui::Text("Right panel");
-  // Right panel content
+  RenderRightBox(document);
 
   ImGui::EndChild();
   ImGui::PopStyleColor();
+  ImGui::PopStyleVar(2);
 }
+
+void UiDocumentTab::RenderLeftBox(Document& document) {
+  ImVec2 content_size = ImGui::GetContentRegionAvail();
+
+  // Top panel
+  float topPanelHeight = content_size.y - 34.0f;
+
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 0.3f));
+  ImGui::BeginChild("LeftPanelTab", ImVec2(content_size.x, topPanelHeight), false);
+  // Add content for top panel here
+  ImGui::EndChild();
+  ImGui::PopStyleColor();
+
+  // Bottom panel
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 0.3f));
+  ImGui::BeginChild("LeftPanelSort", ImVec2(content_size.x, 30.0f), false);
+  ImVec2 content_size_button = ImGui::GetContentRegionAvail();
+  ImGui::Button("Sort", ImVec2(content_size_button.x, content_size_button.y));
+  ImGui::EndChild();
+  ImGui::PopStyleColor();
+}
+
+void UiDocumentTab::RenderRightBox(Document& document) {
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+    ImGui::Text("Right panel");
+    ImGui::PopStyleColor();
+}
+
 
 } // linea_one::ui

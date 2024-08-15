@@ -20,9 +20,7 @@
  */
 #pragma once
 #include <document.h>
-
-#include <memory>
-#include <vector>
+#include <imgui.h>
 
 namespace linea_one::ui {
 
