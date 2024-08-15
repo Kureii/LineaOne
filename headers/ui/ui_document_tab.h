@@ -25,13 +25,14 @@
 namespace linea_one::ui {
 
 class UiDocumentTab {
-public:
- UiDocumentTab() = default;
+ public:
+  UiDocumentTab() = default;
 
- void Render(Document& document);
- void RenderLeftBox(Document& document);
- void RenderRightBox(Document& document);
+  void Render(Document& document);
 
+ private:
+  void RenderLeftBox(Document& document);
+  void RenderRightBox(Document& document);
 };
 
-} // linea_one::ui
+}  // namespace linea_one::ui
