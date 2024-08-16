@@ -25,8 +25,8 @@
 
 #include <memory>
 
-#define EVENT_CONTAINER_HEIGHT 115
-#define EVENT_CONTAINER_HEIGHT_EXPANDED 159
+#define EVENT_CONTAINER_HEIGHT 105
+#define EVENT_CONTAINER_HEIGHT_EXPANDED 139
 #define DRAG_INDICATOR_ICON_PATH RESOURCES_PATH "/icons/drag_indicator.svg"
 #define DELETE_FOREVER_ICON_PATH RESOURCES_PATH "/icons/delete_forever.svg"
 #define ARROW_DROP_UP_ICON_PATH RESOURCES_PATH "/icons/arrow_drop_up.svg"
@@ -51,7 +51,7 @@ class UiDocumentTab {
  private:
   inline void RenderLeftBox(Document& document);
   inline void RenderRightBox(Document& document);
-  inline void RenderEventBox(TimelineEvent& event, int order);
+  inline void RenderEventBox(Document& document, TimelineEvent& event, int order);
   inline void RenderExpanderButton(
     TimelineEvent& event, float width, float height);
   inline void RenderDateInput(TimelineEvent& event, float width);
@@ -59,7 +59,7 @@ class UiDocumentTab {
   inline void RenderDescriptionInput(
     TimelineEvent& event, float width, int order);
   inline void ParseYear(TimelineEvent& event, int index);
-  inline void DeleteEvent(TimelineEvent& event);
+  inline void DeleteEvent(Document& doc, const TimelineEvent& event);
 
   std::shared_ptr<SDL_Renderer> p_renderer_;
   std::shared_ptr<svg::SvgIcon> p_drag_icon_;

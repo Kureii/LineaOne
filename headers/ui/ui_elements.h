@@ -34,9 +34,9 @@ extern void RenderIcon(std::shared_ptr<svg::SvgIcon> icon, float icon_padding,
   float icon_height, float icon_width, ImVec2 cursor_pos);
 
 extern bool RenderIconButton(
-  std::shared_ptr<svg::SvgIcon> icon, float icon_padding, float icon_height,
-  float icon_width, float button_padding, float button_height,
-  float button_width, ImVec2 icon_pos, ImVec2 button_pos,
+  std::string& name, std::shared_ptr<svg::SvgIcon> icon, float icon_padding,
+  float icon_height, float icon_width, ImVec2 icon_pos, float button_padding,
+  float button_height, float button_width, ImVec2 button_pos,
   const std::function<void()>& callback = []() {});
 
 }  // namespace linea_one::ui::elements

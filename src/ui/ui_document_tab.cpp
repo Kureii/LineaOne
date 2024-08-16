@@ -121,7 +121,7 @@ void UiDocumentTab::RenderLeftBox(Document& document) {
     new_year_++;
   }
   for (int i = 0; i < document.events.size(); ++i) {
-    RenderEventBox(document.events[i], i);
+    RenderEventBox(document, document.events[i], i);
   }
 
   if (ImGui::Button("Add", ImVec2(content_size.x, 20))) {
@@ -146,13 +146,21 @@ void UiDocumentTab::RenderRightBox(Document& document) {
   ImGui::PopStyleColor();
 }
 
-void UiDocumentTab::RenderEventBox(TimelineEvent& event, const int order) {
+void UiDocumentTab::RenderEventBox(
+  Document& document, TimelineEvent& event, const int order) {
   const ImVec2 content_size = ImGui::GetContentRegionAvail();
   const float container_height =
     event.expanded ? EVENT_CONTAINER_HEIGHT_EXPANDED : EVENT_CONTAINER_HEIGHT;
 
   ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 0.0f);
-  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.02f, 0.02f, 0.02f, 1.0f));
+  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+  ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+
+  const ImVec4 bg_color(0.15f, 0.15f, 0.15f, 1.0f);  // Tmavě šedá barva pozadí
+  const ImVec4 border_color(0.3f, 0.3f, 0.3f, 1.0f); // Světlejší šedá pro obrys
+
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, bg_color);
+  ImGui::PushStyleColor(ImGuiCol_Border, border_color);
 
   ImGui::BeginChild(
     std::format("EventContainer_{}", std::to_string(event.id)).c_str(),
@@ -203,28 +211,31 @@ void UiDocumentTab::RenderEventBox(TimelineEvent& event, const int order) {
   ImGui::SameLine(
     content_size_right_to_separator.x - ICON_SIZE * 2 - ICON_PADDING * 4);
 
-  elements::RenderIconButton(p_delete_icon_, ICON_PADDING, container_height,
-    ICON_SIZE, 20, container_height / 3, ICON_SIZE + ICON_PADDING,
+  auto name = std::format("##delete_button_{}", event.id);
+  elements::RenderIconButton(name,p_delete_icon_, ICON_PADDING, container_height,
+    ICON_SIZE,ImVec2(
+      content_size_right_to_separator.x - ICON_SIZE * 2 + ICON_PADDING * 5 + 8 ,
+      -3), 20, 36, ICON_SIZE + ICON_PADDING,
+
     ImVec2(
-      content_size_right_to_separator.x - ICON_SIZE * 2 + ICON_PADDING * 5 + 8,
-      0),
-    ImVec2(
-      content_size_right_to_separator.x - ICON_SIZE * 2 + ICON_PADDING * 4 + 8,
-      container_height / 2 + 10),
-    [this, &event]() { DeleteEvent(event); });
+      content_size_right_to_separator.x - ICON_SIZE *3 + ICON_PADDING * 6 + 8 ,
+      event.expanded ? content_box_height/4.5 : content_box_height/8),
+    [this, &event, &document]() { DeleteEvent(document, event); });
 
   ImGui::EndChild();
-  ImGui::PopStyleColor();
-  ImGui::PopStyleVar();
+  ImGui::PopStyleColor(2);
+  ImGui::PopStyleVar(3);
+  ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal, 1.0f);
 }
 
 void UiDocumentTab::RenderExpanderButton(
   TimelineEvent& event, float width, float height) {
   auto icon = event.expanded ? p_arrow_drop_up_icon_ : p_arrow_drop_down_icon_;
-  auto icon_pos = event.expanded ? ImVec2(width / 2 - 16, height * 1.618f - 1)
-                                 : ImVec2(width / 2 - 16, height * 2 - 19);
-  if (elements::RenderIconButton(icon, 3, ICON_SIZE, width, 0, 20, width + 52,
-        icon_pos, ImVec2(0, height + 30))) {
+  auto icon_pos = event.expanded ? ImVec2(width / 2 - 16, height * 1.72f - 1)
+                                 : ImVec2(width / 2 - 16, height * 2 -8);
+  auto name = std::format("##expander_button_{}", event.id);
+  if (elements::RenderIconButton(name, icon, 3, ICON_SIZE, width, icon_pos, 0,
+        20, width - 16, ImVec2(0,  height-28))) {
     event.expanded = !event.expanded;
   }
 }
@@ -302,8 +313,12 @@ void UiDocumentTab::ParseYear(TimelineEvent& event, int index) {
   }
 }
 
-void UiDocumentTab::DeleteEvent(TimelineEvent& event) {
-  std::cout << "Delete event" << std::endl;
+void UiDocumentTab::DeleteEvent(Document& doc, const TimelineEvent& event) {
+  for (int i = 0; i < doc.events.size(); ++i) {
+    if (doc.events[i].id == event.id) {
+      doc.events.erase(doc.events.begin() + i);
+    }
+  }
 }
 
 }  // namespace linea_one::ui
