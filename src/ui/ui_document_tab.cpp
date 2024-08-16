@@ -248,7 +248,7 @@ void UiDocumentTab::RenderEventBox(
   ImGui::EndChild();
   ImGui::PopStyleColor(2);
   ImGui::PopStyleVar(3);
-  ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal, 1.0f);
+  ImGui::Separator();
 }
 
 void UiDocumentTab::RenderExpanderButton(
