@@ -20,14 +20,17 @@
  */
 #pragma once
 
-#include <vector>
+#include <cstdint>
 #include <iostream>
 
 namespace linea_one {
 
 struct TimelineEvent {
+  uint64_t id;
   int year;
   std::string headline;
+  bool expanded;
+  std::string description;
 };
 
 }

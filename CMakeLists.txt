@@ -15,9 +15,11 @@ include(cmake/source.cmake)
 message(STATUS "Started CMake for ${PROJECT_NAME} v${PROJECT_VERSION}...")
 
 configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.h.in
-        ${CMAKE_CURRENT_BINARY_DIR}/src/config.h
+        cmake/config.h.in
+        src/config.h
 )
+
+add_subdirectory(lib/nanosvg)
 
 add_compile_options(-g -Wall -Wformat)
 
@@ -57,8 +59,21 @@ include_directories(${PROJECT_NAME}
         ${IMGUI_DIR}
         ${IMGUI_DIR}/backends
 )
+add_custom_target(copy_resources ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/resources
+        ${CMAKE_BINARY_DIR}/resources
+        COMMENT "Copying resources into binary directory"
+)
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+add_dependencies(${PROJECT_NAME} copy_resources)
 
-target_link_libraries(${PROJECT_NAME} ${LIBS})
+target_compile_definitions(${PROJECT_NAME} PRIVATE RESOURCES_PATH="${CMAKE_BINARY_DIR}/resources")
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR} lib/nanosvg/src)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+        ${LIBS}
+        nanosvg
+)
 

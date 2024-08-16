@@ -15,34 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
- * File: ui_document_tab.h
- * Created by kureii on 8/14/24
+ * File: svg_icon.h
+ * Created by kureii on 8/15/24
  */
 #pragma once
-#include <document.h>
-#include <imgui.h>
-#include <svg_icon.h>
 
+#include <string>
 #include <memory>
-#define EVENT_CONTAINER_HEIGHT 126
-#define EVENT_CONTAINER_HEIGHT_EXPANDED 226
+#include <imgui.h>
+#include <imgui_impl_sdl3.h>
+#include <imgui_impl_sdlrenderer3.h>
+#include <SDL3/SDL.h>
 
-namespace linea_one::ui {
+namespace linea_one::svg {
 
-class UiDocumentTab {
+
+class SvgIcon {
  public:
-  UiDocumentTab(std::shared_ptr<SDL_Renderer> p_renderer);
-
-  void Render(Document& document);
-
+  SvgIcon(const std::string& filename, SDL_Renderer* p_renderer);
+ ~SvgIcon();
+ void Draw(ImVec2 pos, ImVec2 size);
  private:
-  void RenderLeftBox(Document& document);
-  void RenderRightBox(Document& document);
-  void RenderEventBox(TimelineEvent& event);
-
- std::shared_ptr<SDL_Renderer> p_renderer_;
- std::unique_ptr<svg::SvgIcon> p_drag_icon_;
- char a_buffer_date_[32];
+ SDL_Renderer* p_renderer_;
+ SDL_Texture* p_texture_;
+ int width_, height_;
 };
 
-}  // namespace linea_one::ui
+} // linea_one::svg

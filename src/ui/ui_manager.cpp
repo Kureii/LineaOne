@@ -24,10 +24,10 @@
 
 namespace linea_one::ui {
 
-UiManager::UiManager(const std::shared_ptr<DocumentManager>& p_doc_man)
-    : p_doc_man_(p_doc_man) {
+UiManager::UiManager(const std::shared_ptr<DocumentManager>& p_doc_man, std::shared_ptr<SDL_Renderer> p_renderer)
+    : p_doc_man_(p_doc_man), p_renderer_(p_renderer) {
   p_main_menu_ = std::make_unique<UiMainMenu>(p_doc_man_);
-  p_doc_tab_ = std::make_unique<UiDocumentTab>();
+  p_doc_tab_ = std::make_unique<UiDocumentTab>(p_renderer_);
   p_modal_dialogs_ = std::make_unique<UiModalDialogs>(p_doc_man_);
 }
 

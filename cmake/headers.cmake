@@ -4,6 +4,8 @@ set(headers
     headers/document_manager.h
     headers/input_manager.h
     headers/renderer.h
+    headers/svg_icon.h
+    headers/ui/ui_elements.h
     headers/ui/ui_manager.h
     headers/ui/ui_main_menu.h
     headers/ui/ui_document_tab.h

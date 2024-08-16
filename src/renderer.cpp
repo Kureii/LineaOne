@@ -28,7 +28,6 @@ namespace linea_one {
 Renderer::Renderer(const std::shared_ptr<SDL_Window>& p_window,
                    const std::shared_ptr<DocumentManager>& doc_man)
     : p_window_(p_window), p_doc_man_(doc_man) {
-  p_ui_man_ = std::make_shared<ui::UiManager>(p_doc_man_);
 }
 
 bool Renderer::Init() {
@@ -41,6 +40,7 @@ bool Renderer::Init() {
     SDL_Log("Error: SDL_CreateRenderer(): %s\n", SDL_GetError());
     return false;
   }
+  p_ui_man_ = std::make_shared<ui::UiManager>(p_doc_man_, p_renderer_);
   return true;
 }
 

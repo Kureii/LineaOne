@@ -32,7 +32,7 @@ namespace linea_one::ui {
 
 class UiManager {
  public:
-  UiManager(const std::shared_ptr<DocumentManager>& p_doc_man);
+  UiManager(const std::shared_ptr<DocumentManager>& p_doc_man, std::shared_ptr<SDL_Renderer> p_renderer);
   void RenderMenu();
   void RenderContent();
   void RenderTabs();
@@ -48,6 +48,7 @@ class UiManager {
   std::unique_ptr<UiMainMenu> p_main_menu_;
   std::unique_ptr<UiDocumentTab> p_doc_tab_;
   std::unique_ptr<UiModalDialogs> p_modal_dialogs_;
+  std::shared_ptr<SDL_Renderer> p_renderer_;
   bool show_unsaved_dialog_ = false;
   bool stop_rendering_ = false;
 };

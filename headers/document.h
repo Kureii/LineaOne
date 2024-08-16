@@ -21,6 +21,7 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 #include <timeline_event.h>
 
 namespace linea_one {

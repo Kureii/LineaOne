@@ -15,34 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
- * File: ui_document_tab.h
- * Created by kureii on 8/14/24
+ * File: ui_elements.h
+ * Created by kureii on 8/16/24
  */
 #pragma once
-#include <document.h>
 #include <imgui.h>
-#include <svg_icon.h>
-
-#include <memory>
-#define EVENT_CONTAINER_HEIGHT 126
-#define EVENT_CONTAINER_HEIGHT_EXPANDED 226
+#include <imgui_internal.h>
 
 namespace linea_one::ui {
-
-class UiDocumentTab {
+class UiElements {
  public:
-  UiDocumentTab(std::shared_ptr<SDL_Renderer> p_renderer);
-
-  void Render(Document& document);
-
- private:
-  void RenderLeftBox(Document& document);
-  void RenderRightBox(Document& document);
-  void RenderEventBox(TimelineEvent& event);
-
- std::shared_ptr<SDL_Renderer> p_renderer_;
- std::unique_ptr<svg::SvgIcon> p_drag_icon_;
- char a_buffer_date_[32];
+  explicit UiElements() = default;
+  virtual ~UiElements() = default;
+  static void VerticalSeparator(
+      float height, float x_offset = 0.0f, float y_offset = 0.0f,
+      ImColor color = ImGui::GetStyle().Colors[ImGuiCol_Separator]);
 };
-
 }  // namespace linea_one::ui
