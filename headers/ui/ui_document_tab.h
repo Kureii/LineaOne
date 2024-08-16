@@ -51,7 +51,8 @@ class UiDocumentTab {
  private:
   inline void RenderLeftBox(Document& document);
   inline void RenderRightBox(Document& document);
-  inline void RenderEventBox(Document& document, TimelineEvent& event, int order);
+  inline void RenderEventBox(
+    Document& document, TimelineEvent& event, int order);
   inline void RenderExpanderButton(
     TimelineEvent& event, float width, float height);
   inline void RenderDateInput(TimelineEvent& event, float width);
@@ -60,6 +61,8 @@ class UiDocumentTab {
     TimelineEvent& event, float width, int order);
   inline void ParseYear(TimelineEvent& event, int index);
   inline void DeleteEvent(Document& doc, const TimelineEvent& event);
+  inline void SwapEvents(
+    Document& document, int source_index, int target_index);
 
   std::shared_ptr<SDL_Renderer> p_renderer_;
   std::shared_ptr<svg::SvgIcon> p_drag_icon_;

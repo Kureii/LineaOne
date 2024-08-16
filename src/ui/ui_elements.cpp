@@ -54,17 +54,18 @@ void RenderIcon(std::shared_ptr<svg::SvgIcon> icon, float icon_padding,
   } else {
     icon->Draw(icon_pos, ImVec2(icon_height, icon_height));
   }
+  if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 }
 
 bool RenderIconButton(std::string& name, std::shared_ptr<svg::SvgIcon> icon,
   float icon_padding, float icon_height, float icon_width, ImVec2 icon_pos,
-  float button_padding,
-   float button_height, float button_width, ImVec2 button_pos,
-  const std::function<void()>& callback) {
+  float button_padding, float button_height, float button_width,
+  ImVec2 button_pos, const std::function<void()>& callback) {
   ImGui::SetCursorPos(
     ImVec2(button_pos.x + button_padding, button_pos.y + button_padding));
   bool clicked =
     ImGui::Button(name.c_str(), ImVec2(button_width, button_height));
+  if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
   ImGui::SetCursorPos(
     ImVec2(icon_pos.x + icon_padding * 2, icon_pos.y + icon_padding * 2));
   RenderIcon(icon, icon_padding, icon_height, icon_width, icon_pos);
