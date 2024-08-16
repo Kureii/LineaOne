@@ -21,6 +21,7 @@
 #pragma once
 #include <document.h>
 #include <document_manager.h>
+#include <input_manager.h>
 #include <ui/ui_document_tab.h>
 #include <ui/ui_main_menu.h>
 
@@ -33,7 +34,8 @@ namespace linea_one::ui {
 class UiManager {
  public:
   UiManager(const std::shared_ptr<DocumentManager>& p_doc_man,
-    std::shared_ptr<SDL_Renderer> p_renderer);
+    const std::shared_ptr<SDL_Renderer>& p_renderer,
+    const std::shared_ptr<InputManager>& p_input_man);
   void RenderMenu();
   void RenderContent();
   void RenderTabs();
@@ -42,15 +44,18 @@ class UiManager {
   [[nodiscard]] bool GetStopRendering() const;
   void SetStopRendering(const bool stop_rendering);
   void SetSharedVars() const;
+  [[nodiscard]] std::shared_ptr<UiDocumentTab> GetUiDocumentTab() const;
 
  private:
   std::shared_ptr<DocumentManager> p_doc_man_;
   std::unique_ptr<UiMainMenu> p_main_menu_;
-  std::unique_ptr<UiDocumentTab> p_doc_tab_;
+  std::shared_ptr<UiDocumentTab> p_doc_tab_;
   std::unique_ptr<UiModalDialogs> p_modal_dialogs_;
   std::shared_ptr<SDL_Renderer> p_renderer_;
+  std::shared_ptr<InputManager> p_input_man_;
   bool show_unsaved_dialog_ = false;
   bool stop_rendering_ = false;
+  bool new_tab_request_ = false;
 };
 
 }  // namespace linea_one::ui

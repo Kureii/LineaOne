@@ -48,7 +48,7 @@ bool App::Init() {
   if (!CreateWindow()) {
     return false;
   }
-  p_renderer_ = std::make_shared<Renderer>(p_window_, p_doc_man_);
+  p_renderer_ = std::make_shared<Renderer>(p_window_, p_doc_man_, p_input_man_);
   if (!p_renderer_->Init()) {
     return false;
   }

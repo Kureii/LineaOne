@@ -55,7 +55,7 @@ class App {
   ImVec4 clear_color_;
   std::shared_ptr<DocumentManager> p_doc_man_;
   std::shared_ptr<Renderer> p_renderer_;
-  std::unique_ptr<InputManager> p_input_man_;
+  std::shared_ptr<InputManager> p_input_man_;
 
   bool new_doc_finised_ = false;
   bool close_doc_finised_ = false;

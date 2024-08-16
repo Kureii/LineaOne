@@ -25,10 +25,11 @@
 namespace linea_one::ui {
 
 UiManager::UiManager(const std::shared_ptr<DocumentManager>& p_doc_man,
-  std::shared_ptr<SDL_Renderer> p_renderer)
-  : p_doc_man_(p_doc_man), p_renderer_(p_renderer) {
+    const std::shared_ptr<SDL_Renderer>& p_renderer,
+    const std::shared_ptr<InputManager>& p_input_man)
+  : p_doc_man_(p_doc_man), p_renderer_(p_renderer), p_input_man_(p_input_man) {
   p_main_menu_ = std::make_unique<UiMainMenu>(p_doc_man_);
-  p_doc_tab_ = std::make_unique<UiDocumentTab>(p_renderer_);
+  p_doc_tab_ = std::make_shared<UiDocumentTab>(p_renderer_);
   p_modal_dialogs_ = std::make_unique<UiModalDialogs>(p_doc_man_);
 }
 
@@ -42,12 +43,20 @@ void UiManager::RenderMenu() {
 void UiManager::RenderContent() {
   RenderTabs();
   if (const auto current_document = p_doc_man_->GetCurrentDocument()) {
-    RenderTabContent(*current_document);
-  }
 
-  if (show_unsaved_dialog_) {
-    p_modal_dialogs_->RenderUnsavedChanges();
-    show_unsaved_dialog_ = p_modal_dialogs_->GetShowUnsavedDialog();
+    RenderTabContent(*current_document);
+    if (p_input_man_->HandleShortcuts() == ASCII_A && new_tab_request_ == false) {
+      p_doc_tab_->AddNewEvent(*current_document);
+      new_tab_request_ = true;
+    }
+    if (p_input_man_->HandleShortcuts() == 0 && new_tab_request_ == true) {
+      new_tab_request_ = false;
+    }
+
+    if (show_unsaved_dialog_) {
+      p_modal_dialogs_->RenderUnsavedChanges();
+      show_unsaved_dialog_ = p_modal_dialogs_->GetShowUnsavedDialog();
+    }
   }
 }
 
@@ -81,6 +90,7 @@ void UiManager::RenderTabs() {
 
 void UiManager::RenderTabContent(Document& doc) const {
   p_doc_tab_->Render(doc);
+
 }
 
 void UiManager::SetShowUnsavedDialog(const bool show_unsaved_dialog) {
@@ -99,6 +109,10 @@ void UiManager::SetStopRendering(const bool stop_rendering) {
 void UiManager::SetSharedVars() const {
   p_main_menu_->SetShowUnsavedDialog(show_unsaved_dialog_);
   p_modal_dialogs_->SetShowUnsavedDialog(show_unsaved_dialog_);
+}
+
+std::shared_ptr<UiDocumentTab> UiManager::GetUiDocumentTab() const {
+  return p_doc_tab_;
 }
 
 }  // namespace linea_one::ui

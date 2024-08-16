@@ -26,8 +26,9 @@
 namespace linea_one {
 
 Renderer::Renderer(const std::shared_ptr<SDL_Window>& p_window,
-  const std::shared_ptr<DocumentManager>& doc_man)
-  : p_window_(p_window), p_doc_man_(doc_man) {}
+    const std::shared_ptr<DocumentManager>& p_doc_man,
+    const std::shared_ptr<InputManager>& p_input_man)
+  : p_window_(p_window), p_doc_man_(p_doc_man), p_input_man_(p_input_man) {}
 
 bool Renderer::Init() {
   p_renderer_ = std::shared_ptr<SDL_Renderer>(
@@ -38,7 +39,7 @@ bool Renderer::Init() {
     SDL_Log("Error: SDL_CreateRenderer(): %s\n", SDL_GetError());
     return false;
   }
-  p_ui_man_ = std::make_shared<ui::UiManager>(p_doc_man_, p_renderer_);
+  p_ui_man_ = std::make_shared<ui::UiManager>(p_doc_man_, p_renderer_, p_input_man_);
   return true;
 }
 
@@ -69,8 +70,12 @@ void Renderer::SetShowUnsavedDialog(const bool show_unsaved_dialog) const {
 
 std::shared_ptr<SDL_Renderer> Renderer::GetSdlRenderer() { return p_renderer_; }
 
-[[nodiscard]] bool Renderer::GetStopRendering() const {
+bool Renderer::GetStopRendering() const {
   return p_ui_man_->GetStopRendering();
+}
+
+std::shared_ptr<ui::UiManager> Renderer::GetUiManager() const {
+  return p_ui_man_;
 }
 
 }  // namespace linea_one

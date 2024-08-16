@@ -26,22 +26,35 @@
 
 namespace linea_one {
 InputManager::InputManager(std::shared_ptr<DocumentManager> doc_man)
-  : action_key(0), doc_man_(doc_man) {}
+  : action_key(0), p_doc_man_(doc_man) {}
 
 uint32_t InputManager::HandleShortcuts() {
   ImGuiIO const& io = ImGui::GetIO();
   if (io.KeyCtrl) {
     if (ImGui::IsKeyPressed(ImGuiKey_N) && action_key != ASCII_N) {
-      doc_man_->CreateNewDocument();
-      action_key = ASCII_N;  // ASCI N
+      p_doc_man_->CreateNewDocument();
+      action_key = ASCII_N;
     }
     if (ImGui::IsKeyPressed(ImGuiKey_W) && action_key != ASCII_W) {
-      if (doc_man_->CloseDocumentWithCheck(
-            doc_man_->GetCurrentDocumentIndex()) >= 0) {
-        action_key = ASCII_W;  // ASCI W
+      if (p_doc_man_->CloseDocumentWithCheck(
+            p_doc_man_->GetCurrentDocumentIndex()) >= 0) {
+        action_key = ASCII_W;
       }
     }
   }
+
+  if (io.KeyShift) {
+    if (ImGui::IsKeyPressed(ImGuiKey_A) && action_key != ASCII_A) {
+      action_key = ASCII_A;
+    }
+  }
+
+  if (ImGui::IsKeyReleased(ImGuiKey_LeftShift) ||
+      ImGui::IsKeyReleased(ImGuiKey_RightShift) ||
+      ImGui::IsKeyReleased(ImGuiKey_A)) {
+    action_key = 0;
+  }
+
   if (ImGui::IsKeyReleased(ImGuiKey_N) ||
       ImGui::IsKeyReleased(ImGuiKey_LeftCtrl) ||
       ImGui::IsKeyReleased(ImGuiKey_RightCtrl)) {
@@ -52,6 +65,7 @@ uint32_t InputManager::HandleShortcuts() {
       ImGui::IsKeyReleased(ImGuiKey_RightCtrl)) {
     action_key = 0;
   }
+
   return action_key;
 }
 

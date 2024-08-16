@@ -119,12 +119,18 @@ void UiDocumentTab::RenderLeftBox(Document& document) {
     last_id_++;
     new_year_++;
   }
-  for (int i = 0; i < document.events.size(); ++i) {
+  for (uint64_t i = 0; i < document.events.size(); ++i) {
     RenderEventBox(document, document.events[i], i);
   }
 
   if (ImGui::Button("Add", ImVec2(content_size.x, 20))) {
     AddNewEvent(document);
+  }
+  if (ImGui::IsItemHovered(
+        ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay)) {
+    ImGui::BeginTooltip();
+    ImGui::TextUnformatted("Shift+A");
+    ImGui::EndTooltip();
   }
 
   ImGui::EndChild();
@@ -145,7 +151,7 @@ void UiDocumentTab::RenderRightBox(Document& document) {
 }
 
 void UiDocumentTab::RenderEventBox(
-  Document& document, TimelineEvent& event, const int order) {
+  Document& document, TimelineEvent& event, uint64_t order) {
   const ImVec2 content_size = ImGui::GetContentRegionAvail();
   const float container_height =
     event.expanded ? EVENT_CONTAINER_HEIGHT_EXPANDED : EVENT_CONTAINER_HEIGHT;
@@ -254,11 +260,13 @@ void UiDocumentTab::RenderEventBox(
 void UiDocumentTab::RenderExpanderButton(
   TimelineEvent& event, float width, float height) {
   auto icon = event.expanded ? p_arrow_drop_up_icon_ : p_arrow_drop_down_icon_;
-  auto icon_pos = event.expanded ? ImVec2(width / 2 - 16, height * 1.72f - 1)
-                                 : ImVec2(width / 2 - 16, height * 2 - 8);
+  auto icon_pos =
+    event.expanded
+      ? ImVec2(width / 2 - 16, height - ICON_SIZE - ICON_PADDING + 2)
+      : ImVec2(width / 2 - 16, height - ICON_SIZE - ICON_PADDING);
   auto name = std::format("##expander_button_{}", event.id);
-  if (elements::RenderIconButton(name, icon, 3, ICON_SIZE, width, icon_pos, 0,
-        20, width - 16, ImVec2(0, height - 28))) {
+  if (elements::RenderIconButton(name, icon, 3, ICON_SIZE, ICON_SIZE, icon_pos,
+        0, 20, width - 16, ImVec2(0, height - 28))) {
     event.expanded = !event.expanded;
   }
 }
@@ -314,7 +322,7 @@ void UiDocumentTab::RenderHeadlineInput(
 }
 
 void UiDocumentTab::RenderDescriptionInput(
-  TimelineEvent& event, const float width, const int order) {
+  TimelineEvent& event, float width, uint64_t order) {
   ImGui::Text("Description");
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 4));
   ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 4));
@@ -329,7 +337,7 @@ void UiDocumentTab::RenderDescriptionInput(
   ImGui::PopStyleVar(2);
 }
 
-void UiDocumentTab::ParseYear(TimelineEvent& event, int index) {
+void UiDocumentTab::ParseYear(TimelineEvent& event, uint64_t index) {
   if (event.year < 0 && index == kAC) {
     event.year = -event.year;
   }
@@ -339,7 +347,7 @@ void UiDocumentTab::ParseYear(TimelineEvent& event, int index) {
 }
 
 void UiDocumentTab::DeleteEvent(Document& doc, const TimelineEvent& event) {
-  for (int i = 0; i < doc.events.size(); ++i) {
+  for (uint64_t i = 0; i < doc.events.size(); ++i) {
     if (doc.events[i].id == event.id) {
       doc.events.erase(doc.events.begin() + i);
     }
@@ -347,7 +355,7 @@ void UiDocumentTab::DeleteEvent(Document& doc, const TimelineEvent& event) {
 }
 
 void UiDocumentTab::SwapEvents(
-  Document& document, int source_index, int target_index) {
+  Document& document, uint64_t source_index, uint64_t target_index) {
   if (source_index != target_index && source_index >= 0 &&
       source_index < document.events.size() && target_index >= 0 &&
       target_index < document.events.size()) {

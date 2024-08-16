@@ -28,6 +28,7 @@
 
 namespace linea_one {
 
+#define ASCII_A 65
 #define ASCII_N 78
 #define ASCII_W 87
 
@@ -39,7 +40,7 @@ class InputManager {
 
  private:
   uint32_t action_key;
-  std::shared_ptr<DocumentManager> doc_man_;
+  std::shared_ptr<DocumentManager> p_doc_man_;
 };
 
 }  // namespace linea_one

@@ -31,18 +31,21 @@ namespace linea_one {
 class Renderer {
  public:
   Renderer(const std::shared_ptr<SDL_Window>& p_window,
-    const std::shared_ptr<DocumentManager>& doc_man);
+    const std::shared_ptr<DocumentManager>& p_doc_man,
+    const std::shared_ptr<InputManager>& p_input_man);
   bool Init();
   void Render() const;
   void SetShowUnsavedDialog(const bool show_unsaved_dialog) const;
   [[nodiscard]] std::shared_ptr<SDL_Renderer> GetSdlRenderer();
   [[nodiscard]] bool GetStopRendering() const;
+  [[nodiscard]] std::shared_ptr<ui::UiManager> GetUiManager() const;
 
  private:
   std::shared_ptr<SDL_Window> p_window_;
   std::shared_ptr<SDL_Renderer> p_renderer_;
   std::shared_ptr<DocumentManager> p_doc_man_;
   std::shared_ptr<ui::UiManager> p_ui_man_;
+  std::shared_ptr<InputManager> p_input_man_;
   bool show_unsaved_dialog_ = false;
 };
 
