@@ -20,31 +20,60 @@
  */
 #include "ui/ui_elements.h"
 
+#include <functional>
 #include <iostream>
 #include <ostream>
+#include <sstream>
 
-namespace linea_one::ui {
+namespace linea_one::ui::elements {
 
-void UiElements::VerticalSeparator(const float height,
-                                   const float x_offset,
-                                   const float y_offset,
-                                   const ImColor color) {
+void VerticalSeparator(const float height, const float x_offset,
+                       const float y_offset, const ImColor color) {
+  ImVec2 p_start = ImGui::GetCursorScreenPos();
+  p_start.x += x_offset;
+  p_start.y += y_offset;
+
+  // Konec čáry je na stejném x, ale vyšší o "height"
+  ImVec2 p_end = ImVec2(p_start.x, p_start.y + height);
+
+  // Získej ImDrawList a přidej čáru
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
-  ImVec2 window_pos = ImGui::GetCursorPos();
-  //ImVec2 window_size = ImGui::GetWindowSize();
-  // Calculate start and end points
-  auto p_start = ImVec2(window_pos.x + x_offset, window_pos.y + y_offset);
-  auto p_end = ImVec2(p_start.x, p_start.y + height);
+  draw_list->AddLine(p_start, p_end, color,
+                     1.0f);  // Poslední argument je šířka čáry (1 pixel)
 
-  // Ensure the separator stays within the window
-  /*p_start.x = ImClamp(p_start.x, window_pos.x, window_pos.x + window_size.x);
-  p_end.x = ImClamp(p_end.x, window_pos.x, window_pos.x + window_size.x);
-  p_start.y = ImClamp(p_start.y, window_pos.y, window_pos.y + window_size.y);
-  p_end.y = ImClamp(p_end.y, window_pos.y, window_pos.y + window_size.y);*/
-
-  // Draw the line
-  draw_list->AddLine(p_start, p_end, color);
+  // Posuň kurzor dolů, pokud potřebuješ další vykreslování pod separátorem
+  ImGui::SetCursorPosY(ImGui::GetCursorPosY() + y_offset + height);
 }
 
-
+void RenderIcon(std::shared_ptr<svg::SvgIcon> icon, float icon_padding,
+                float icon_height, float icon_width, ImVec2 cursor_pos) {
+  ImVec2 icon_pos(cursor_pos.x + icon_padding,
+                  cursor_pos.y + icon_height / 2 - icon_width / 2);
+  if (icon_height > icon_width) {
+    icon->Draw(icon_pos, ImVec2(icon_width, icon_width));
+  } else {
+    icon->Draw(icon_pos, ImVec2(icon_height, icon_height));
+  }
 }
+
+bool RenderIconButton(std::shared_ptr<svg::SvgIcon> icon, float icon_padding,
+                      float icon_height, float icon_width, float button_padding,
+                      float button_height, float button_width,
+                      ImVec2 icon_pos, ImVec2 button_pos,
+                      const std::function<void()>& callback) {
+  ImGui::SetCursorScreenPos(
+      ImVec2(button_pos.x + button_padding, button_pos.y + button_padding));
+
+  bool clicked = ImGui::Button("##Button 1", ImVec2(button_width, button_height));
+  ImGui::SetCursorScreenPos(
+      ImVec2(icon_pos.x + icon_padding * 2, icon_pos.y + icon_padding * 2));
+  RenderIcon(icon, icon_padding, icon_height, icon_width, icon_pos);
+
+  if (clicked && callback) {
+    callback();
+  }
+
+  return clicked;
+}
+
+}  // namespace linea_one::ui::elements

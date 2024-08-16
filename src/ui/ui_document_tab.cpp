@@ -24,30 +24,47 @@
 #include <ui/ui_elements.h>
 
 #include <algorithm>
+#include <format>
 
 namespace linea_one::ui {
 
-auto event = TimelineEvent{0, 1999, "I", false, "lorem ipsum"};
+UiDocumentTab::UiDocumentTab(const std::shared_ptr<SDL_Renderer>& p_renderer)
+    : p_renderer_(p_renderer), year_(1999), new_year_(1999) {
+  p_drag_icon_ = std::make_shared<svg::SvgIcon>(DRAG_INDICATOR_ICON_PATH,
+                                                p_renderer.get());
+  p_delete_icon_ = std::make_shared<svg::SvgIcon>(DELETE_FOREVER_ICON_PATH,
+                                                  p_renderer.get());
+  p_arrow_drop_up_icon_ =
+      std::make_shared<svg::SvgIcon>(ARROW_DROP_UP_ICON_PATH, p_renderer.get());
+  p_arrow_drop_down_icon_ = std::make_shared<svg::SvgIcon>(
+      ARROW_DROP_DOWN_ICON_PATH, p_renderer.get());
+  a_buffer_headline_ = new char[BUFFER_HEADLINE_SIZE];
+  for (auto i = 0; i < BUFFER_HEADLINE_SIZE; i++) {
+    a_buffer_headline_[i] = '\0';
+  }
+  a_buffer_description_ = new char[BUFFER_DESCRIPTION_SIZE];
+  for (auto i = 0; i < BUFFER_DESCRIPTION_SIZE; i++) {
+    a_buffer_description_[i] = '\0';
+  }
+}
 
-UiDocumentTab::UiDocumentTab(std::shared_ptr<SDL_Renderer> p_renderer)
-    : p_renderer_(p_renderer) {
-  p_drag_icon_ = std::make_unique<svg::SvgIcon>(
-      RESOURCES_PATH "/icons/drag_indicator.svg", p_renderer.get());
+UiDocumentTab::~UiDocumentTab() {
+  if (a_buffer_headline_) delete[] a_buffer_headline_;
+  if (a_buffer_description_) delete[] a_buffer_description_;
 }
 
 void UiDocumentTab::Render(Document& document) {
-  ImVec2 content_size = ImGui::GetContentRegionAvail();
+  const ImVec2 content_size = ImGui::GetContentRegionAvail();
 
-  static float leftPanelWidth = 400.0f;
-
-  float minWidth = 400.0f;
-  float maxWidth = content_size.x * 0.5f;
-  leftPanelWidth = std::clamp(leftPanelWidth, minWidth, maxWidth);
+  constexpr float minWidth = MIN_SIZE_LEFT_PANEL;
+  const float maxWidth = content_size.x * 0.5f;
+  left_panel_width_ = std::clamp(left_panel_width_, minWidth, maxWidth);
 
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
   ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0);
 
-  ImGui::BeginChild("LeftPanel", ImVec2(leftPanelWidth, content_size.y), true);
+  ImGui::BeginChild("LeftPanel", ImVec2(left_panel_width_, content_size.y),
+                    true);
 
   RenderLeftBox(document);
 
@@ -63,8 +80,8 @@ void UiDocumentTab::Render(Document& document) {
 
   if (ImGui::IsItemActive()) {
     float mousePositionX = ImGui::GetIO().MousePos.x;
-    leftPanelWidth = mousePositionX - ImGui::GetWindowPos().x;
-    leftPanelWidth = std::clamp(leftPanelWidth, minWidth, maxWidth);
+    left_panel_width_ = mousePositionX - ImGui::GetWindowPos().x;
+    left_panel_width_ = std::clamp(left_panel_width_, minWidth, maxWidth);
   }
 
   // Cursor
@@ -83,6 +100,12 @@ void UiDocumentTab::Render(Document& document) {
   ImGui::PopStyleVar(2);
 }
 
+void UiDocumentTab::AddNewEvent(Document& document) {
+  document.events.emplace_back(last_id_, new_year_, "", false, "");
+  last_id_++;
+  new_year_++;
+}
+
 void UiDocumentTab::RenderLeftBox(Document& document) {
   ImVec2 content_size = ImGui::GetContentRegionAvail();
 
@@ -92,8 +115,18 @@ void UiDocumentTab::RenderLeftBox(Document& document) {
   ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 0.3f));
   ImGui::BeginChild("LeftPanelTab", ImVec2(content_size.x, topPanelHeight),
                     false);
-  // Add content for top panel here
-  RenderEventBox(event);
+  if (document.events.empty()) {
+    document.events.emplace_back(last_id_, new_year_, "", false, "");
+    last_id_++;
+    new_year_++;
+  }
+  for (int i = 0; i < document.events.size(); ++i) {
+    RenderEventBox(document.events[i], i);
+  }
+
+  if (ImGui::Button("Add", ImVec2(content_size.x, 20))) {
+    AddNewEvent(document);
+  }
 
   ImGui::EndChild();
   ImGui::PopStyleColor();
@@ -113,124 +146,166 @@ void UiDocumentTab::RenderRightBox(Document& document) {
   ImGui::PopStyleColor();
 }
 
-void UiDocumentTab::RenderEventBox(TimelineEvent& event) {
-  ImVec2 content_size = ImGui::GetContentRegionAvail();
-  float container_height =
+void UiDocumentTab::RenderEventBox(TimelineEvent& event, const int order) {
+  const ImVec2 content_size = ImGui::GetContentRegionAvail();
+  const float container_height =
       event.expanded ? EVENT_CONTAINER_HEIGHT_EXPANDED : EVENT_CONTAINER_HEIGHT;
 
   ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 0.0f);
   ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.02f, 0.02f, 0.02f, 1.0f));
 
-  ImGui::BeginChild(("EventContainer_" + std::to_string(event.id)).c_str(),
-                    ImVec2(content_size.x, container_height), true,
-                    ImGuiWindowFlags_NoScrollbar);
+  ImGui::BeginChild(
+      std::format("EventContainer_{}", std::to_string(event.id)).c_str(),
+      ImVec2(content_size.x, container_height), true,
+      ImGuiWindowFlags_NoScrollbar);
 
-  // Horizontal layout
+  elements::RenderIcon(p_drag_icon_, ICON_PADDING, container_height, ICON_SIZE,
+                       ImVec2(-2, 0));
+
+  ImGui::SameLine(ICON_SIZE + ICON_PADDING);
+  ImGui::SetCursorPosY(0);
+  elements::VerticalSeparator(container_height, 8);
+  ImGui::SameLine(ICON_SIZE + ICON_PADDING * 2, 8);
+
+  ImVec2 content_size_right_to_separator = ImGui::GetContentRegionAvail();
+  float content_box_width =
+      content_size_right_to_separator.x - ICON_SIZE * 2 - ICON_PADDING * 3;
+  float content_box_height = container_height - 8.0f;
+  float content_box_y_offset = 8;
+  // Content area
   {
-    // Drag indicator icon
-    float icon_size = 24.0f;
-    float icon_padding = 8.0f;
-    ImVec2 icon_pos(icon_padding, container_height / 2 - icon_size / 2);
-    p_drag_icon_->Draw(icon_pos, ImVec2(icon_size, icon_size));
+    ImGui::SetCursorPos(
+        ImVec2(ImGui::GetCursorPosX() + 12, content_box_y_offset));
 
-    ImGui::SameLine(icon_size + icon_padding * 2);
-    UiElements::VerticalSeparator(container_height+8, 8, event.expanded ? -56 : 0);
+    ImGui::BeginChild(
+        std::format("EventContainerTexts_{}", std::to_string(event.id)).c_str(),
+        ImVec2(content_box_width, content_box_height), false,
+        ImGuiWindowFlags_NoScrollbar);
 
-    ImGui::SameLine(icon_size + icon_padding * 2,8);
+    RenderDateInput(event, content_box_width);
+    ImGui::Spacing();
 
-    // Content area
-    {
-      ImVec2 content_size_right_to_separator = ImGui::GetContentRegionAvail();
-      float red_box_width = content_size_right_to_separator.x - 24.0f;
-      float red_box_height = container_height - 8.0f;
+    RenderHeadlineInput(event, content_box_width);
+    ImGui::Spacing();
 
-      // Calculate the position to align the center of the red box with the top
-      // of the container
-      float red_box_y_offset = 8;
-
-      ImGui::SetCursorPos(
-          ImVec2(ImGui::GetCursorPosX() + 12, red_box_y_offset));
-
-
-      ImGui::BeginChild(
-          ("EventContainerTexts_" + std::to_string(event.id)).c_str(),
-          ImVec2(red_box_width, red_box_height), false,
-          ImGuiWindowFlags_NoScrollbar);
-
-      {
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-        ImGui::BeginChild(
-            ("EventContainerTexts2_" + std::to_string(event.id)).c_str(),
-            ImVec2(red_box_width, 48),
-            false, ImGuiWindowFlags_NoScrollbar);
-        {
-          ImGui::Text("Date");
-          char buf[64];
-          ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 4));
-          ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 4));
-          ImGui::SetNextItemWidth(red_box_width - 16);
-          ImGui::InputText("##DateInput", buf, 64);
-          ImGui::PopStyleVar(2);
-        }
-        ImGui::EndChild();
-        ImGui::PopStyleVar(2);
-      }
-
-      {
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-
-        ImGui::BeginChild(
-            ("EventContainerTexts3_" + std::to_string(event.id)).c_str(),
-            ImVec2(red_box_width, 48),
-            false, ImGuiWindowFlags_NoScrollbar);
-        {
-          ImGui::Text("Headline");
-          char buf[64];
-          ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 4));
-          ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 4));
-          ImGui::SetNextItemWidth(red_box_width - 16);
-          ImGui::InputText("##HeadlineInput", buf, 64);
-          ImGui::PopStyleVar(2);
-        }
-        ImGui::EndChild();
-        ImGui::PopStyleVar(2);
-
-      }
-
-      if (event.expanded) {
-        ImGui::BeginChild(
-            ("EventContainerTexts5_" + std::to_string(event.id)).c_str(),
-            ImVec2(red_box_width, 96),
-            false, ImGuiWindowFlags_NoScrollbar);
-        {
-          ImGui::Text("Description");
-          char buf[256];
-          ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 4));
-          ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 4));
-          ImGui::SetNextItemWidth(red_box_width - 16);
-          ImGui::InputTextMultiline("##Description", buf, 256);
-          ImGui::PopStyleVar(2);
-        }
-        ImGui::EndChild();
-      }
-
-      {
-        ImGui::SetNextItemWidth(red_box_width);
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + red_box_width / 2 - icon_padding * 2 - icon_padding);
-        if (ImGui::ArrowButton(("expand_" + std::to_string(event.id)).c_str(),
-                               event.expanded ? ImGuiDir_Up : ImGuiDir_Down)) {
-          event.expanded = !event.expanded;
-        }
-      }
-      ImGui::EndChild();
+    if (event.expanded) {
+      RenderDescriptionInput(event, content_box_width, order);
+      ImGui::Spacing();
     }
+    RenderExpanderButton(event, content_box_width, container_height);
+    ImGui::EndChild();
   }
+
+  ImGui::SameLine(
+      content_size_right_to_separator.x - ICON_SIZE * 2 + ICON_PADDING * 3, 8);
+  ImGui::SetCursorPosY(0);
+  elements::VerticalSeparator(container_height, 8);
+  ImGui::SameLine(content_size_right_to_separator.x - ICON_SIZE * 2 -
+                  ICON_PADDING * 4);
+
+  elements::RenderIconButton(p_delete_icon_, ICON_PADDING, container_height,
+                             ICON_SIZE, 20, container_height / 3,
+                             ICON_SIZE + ICON_PADDING,
+                             ImVec2(content_size_right_to_separator.x -
+                                        ICON_SIZE * 2 + ICON_PADDING * 5 + 8,
+                                    0),
+                             ImVec2(content_size_right_to_separator.x -
+                                        ICON_SIZE * 2 + ICON_PADDING * 4 + 8,
+                                    container_height / 2 + 10),
+                             [this, &event]() { DeleteEvent(event); });
 
   ImGui::EndChild();
   ImGui::PopStyleColor();
   ImGui::PopStyleVar();
+}
+
+void UiDocumentTab::RenderExpanderButton(TimelineEvent& event, float width,
+                                         float height) {
+  auto icon = event.expanded ? p_arrow_drop_up_icon_ : p_arrow_drop_down_icon_;
+  auto icon_pos = event.expanded ? ImVec2(width / 2 - 16, height * 1.618f-1)
+                                 : ImVec2(width / 2 - 16, height * 2 - 19);
+  if (elements::RenderIconButton(icon, 3, ICON_SIZE, width, 0, 20, width + 52,
+                                 icon_pos, ImVec2(0, height + 30))) {
+    event.expanded = !event.expanded;
+  }
+}
+
+void UiDocumentTab::RenderDateInput(TimelineEvent& event, const float width) {
+  ImGui::Text("Date");
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 4));
+  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 4));
+  ImGui::SetNextItemWidth(width - 72);
+  year_ = event.year;
+  if (year_ < 0) {
+    year_ *= -1;
+  }
+  if (ImGui::DragInt("##Date", &year_, 1, 0, 100000, "%d",
+                     ImGuiSliderFlags_AlwaysClamp)) {
+    event.year = year_;
+    ParseYear(event, index_bc_ac_);
+  }
+  ImGui::SameLine(width - 60, 0);
+  ImGui::SetNextItemWidth(45);
+  if (ImGui::BeginCombo(std::format("##BC_AC_{}", event.id).c_str(),
+                        bc_ac_items_[index_bc_ac_],
+                        ImGuiComboFlags_NoArrowButton)) {
+    for (int n = 0; n < IM_ARRAYSIZE(bc_ac_items_); n++) {
+      const bool is_selected = (index_bc_ac_ == n);
+      if (ImGui::Selectable(bc_ac_items_[n], is_selected)) {
+        index_bc_ac_ = n;
+        ParseYear(event, index_bc_ac_);
+      }
+
+      if (is_selected) {
+        ImGui::SetItemDefaultFocus();
+      }
+    }
+    ImGui::EndCombo();
+  }
+  ImGui::PopStyleVar(2);
+}
+
+void UiDocumentTab::RenderHeadlineInput(TimelineEvent& event,
+                                        const float width) {
+  ImGui::Text("Headline");
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 4));
+  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 4));
+  ImGui::SetNextItemWidth(width - 16);
+  strncpy(a_buffer_headline_, event.headline.c_str(), BUFFER_HEADLINE_SIZE);
+  if (ImGui::InputText(std::format("##HeadlineInput_{}", event.id).c_str(),
+                       a_buffer_headline_, BUFFER_HEADLINE_SIZE)) {
+    event.headline = std::string(a_buffer_headline_);
+  }
+  ImGui::PopStyleVar(2);
+}
+
+void UiDocumentTab::RenderDescriptionInput(TimelineEvent& event,
+                                           const float width, const int order) {
+  ImGui::Text("Description");
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 4));
+  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 4));
+  ImGui::SetNextItemWidth(width - 16);
+  strncpy(a_buffer_description_, event.description.c_str(),
+          BUFFER_DESCRIPTION_SIZE);
+  a_buffer_description_[BUFFER_DESCRIPTION_SIZE - 1] = '\0';
+  if (ImGui::InputText(std::format("##DescriptionInput_{}", event.id).c_str(),
+                       a_buffer_description_, BUFFER_DESCRIPTION_SIZE)) {
+    event.description = std::string(a_buffer_description_);
+  }
+  ImGui::PopStyleVar(2);
+}
+
+void UiDocumentTab::ParseYear(TimelineEvent& event, int index) {
+  if (event.year < 0 && index == kAC) {
+    event.year = -event.year;
+  }
+  if (event.year > 0 && index == kBC) {
+    event.year = -event.year;
+  }
+}
+
+void UiDocumentTab::DeleteEvent(TimelineEvent& event) {
+  std::cout << "Delete event" << std::endl;
 }
 
 }  // namespace linea_one::ui

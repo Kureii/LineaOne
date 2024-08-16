@@ -20,29 +20,60 @@
  */
 #pragma once
 #include <document.h>
-#include <imgui.h>
 #include <svg_icon.h>
+#include <ui/ui_elements.h>
 
 #include <memory>
-#define EVENT_CONTAINER_HEIGHT 126
-#define EVENT_CONTAINER_HEIGHT_EXPANDED 226
+#define EVENT_CONTAINER_HEIGHT 115
+#define EVENT_CONTAINER_HEIGHT_EXPANDED 159
+#define DRAG_INDICATOR_ICON_PATH RESOURCES_PATH "/icons/drag_indicator.svg"
+#define DELETE_FOREVER_ICON_PATH RESOURCES_PATH "/icons/delete_forever.svg"
+#define ARROW_DROP_UP_ICON_PATH RESOURCES_PATH "/icons/arrow_drop_up.svg"
+#define ARROW_DROP_DOWN_ICON_PATH RESOURCES_PATH "/icons/arrow_drop_down.svg"
+#define ICON_SIZE 24.0f
+#define ICON_PADDING 8.0f
+#define BUFFER_HEADLINE_SIZE 256
+#define BUFFER_DESCRIPTION_SIZE 2048
+#define MIN_SIZE_LEFT_PANEL 400.0f
 
 namespace linea_one::ui {
 
+enum e_dating {
+ kBC = 0,
+ kAC
+};
+
 class UiDocumentTab {
  public:
-  UiDocumentTab(std::shared_ptr<SDL_Renderer> p_renderer);
-
+  explicit UiDocumentTab(const std::shared_ptr<SDL_Renderer>& p_renderer);
+  ~UiDocumentTab();
   void Render(Document& document);
+  void AddNewEvent(Document& document);
 
  private:
-  void RenderLeftBox(Document& document);
-  void RenderRightBox(Document& document);
-  void RenderEventBox(TimelineEvent& event);
+  inline void RenderLeftBox(Document& document);
+  inline void RenderRightBox(Document& document);
+  inline void RenderEventBox(TimelineEvent& event, int order);
+  inline void RenderExpanderButton(TimelineEvent& event, float width, float height);
+  inline void RenderDateInput(TimelineEvent& event, float width);
+  inline void RenderHeadlineInput(TimelineEvent& event, float width);
+  inline void RenderDescriptionInput(TimelineEvent& event, float width,
+                                     int order);
+ inline void ParseYear(TimelineEvent& event,int index);
+ inline void DeleteEvent(TimelineEvent& event);
 
  std::shared_ptr<SDL_Renderer> p_renderer_;
- std::unique_ptr<svg::SvgIcon> p_drag_icon_;
- char a_buffer_date_[32];
+ std::shared_ptr<svg::SvgIcon> p_drag_icon_;
+ std::shared_ptr<svg::SvgIcon> p_delete_icon_;
+ std::shared_ptr<svg::SvgIcon> p_arrow_drop_up_icon_;
+ std::shared_ptr<svg::SvgIcon> p_arrow_drop_down_icon_;
+ char* a_buffer_headline_;
+ char* a_buffer_description_;
+ int index_bc_ac_ = kAC;
+ const char* bc_ac_items_[2] = {"BC","AC"} ;
+ int year_, new_year_;
+ uint64_t last_id_ = 0;
+ float left_panel_width_ = MIN_SIZE_LEFT_PANEL;
 };
 
 }  // namespace linea_one::ui

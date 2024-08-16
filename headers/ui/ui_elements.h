@@ -20,15 +20,23 @@
  */
 #pragma once
 #include <imgui.h>
-#include <imgui_internal.h>
+#include <svg_icon.h>
 
-namespace linea_one::ui {
-class UiElements {
- public:
-  explicit UiElements() = default;
-  virtual ~UiElements() = default;
-  static void VerticalSeparator(
-      float height, float x_offset = 0.0f, float y_offset = 0.0f,
-      ImColor color = ImGui::GetStyle().Colors[ImGuiCol_Separator]);
-};
-}  // namespace linea_one::ui
+#include <functional>
+#include <memory>
+
+namespace linea_one::ui::elements {
+extern void VerticalSeparator(
+    float height, float x_offset = 0.0f, float y_offset = 0.0f,
+    ImColor color = ImGui::GetStyle().Colors[ImGuiCol_Separator]);
+
+extern void RenderIcon(std::shared_ptr<svg::SvgIcon> icon, float icon_padding,
+                       float icon_height, float icon_width, ImVec2 cursor_pos);
+
+extern bool RenderIconButton(
+    std::shared_ptr<svg::SvgIcon> icon, float icon_padding, float icon_height,
+    float icon_width, float button_padding, float button_height,
+    float button_width, ImVec2 icon_pos, ImVec2 button_pos,
+    const std::function<void()>& callback = []() {});
+
+}  // namespace linea_one::ui::elements
