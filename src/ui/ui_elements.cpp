@@ -33,15 +33,12 @@ void VerticalSeparator(const float height, const float x_offset,
   p_start.x += x_offset;
   p_start.y += y_offset;
 
-  // Konec čáry je na stejném x, ale vyšší o "height"
   ImVec2 p_end = ImVec2(p_start.x, p_start.y + height);
 
-  // Získej ImDrawList a přidej čáru
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
   draw_list->AddLine(p_start, p_end, color,
-    1.0f);  // Poslední argument je šířka čáry (1 pixel)
+    0.5f);
 
-  // Posuň kurzor dolů, pokud potřebuješ další vykreslování pod separátorem
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() + y_offset + height);
 }
 
