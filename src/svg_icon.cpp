@@ -27,7 +27,7 @@
 namespace linea_one::svg {
 
 SvgIcon::SvgIcon(const std::string& filename, SDL_Renderer* p_renderer)
-    : p_renderer_(p_renderer), p_texture_(nullptr) {
+  : p_renderer_(p_renderer), p_texture_(nullptr) {
   NSVGimage* image = nsvgParseFromFile(filename.c_str(), "px", 96);
   if (image == nullptr) {
     SDL_Log("Error loading SVG: %s", filename.c_str());
@@ -43,7 +43,7 @@ SvgIcon::SvgIcon(const std::string& filename, SDL_Renderer* p_renderer)
 
   // Vytvoření SDL_Surface s použitím aktuální verze SDL_CreateSurfaceFrom
   SDL_Surface* surface = SDL_CreateSurfaceFrom(
-      width_, height_, SDL_PIXELFORMAT_RGBA32, pixels, width_ * 4);
+    width_, height_, SDL_PIXELFORMAT_RGBA32, pixels, width_ * 4);
   if (surface) {
     p_texture_ = SDL_CreateTextureFromSurface(p_renderer_, surface);
     SDL_DestroySurface(surface);

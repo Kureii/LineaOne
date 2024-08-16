@@ -32,14 +32,14 @@ namespace linea_one {
 #define ASCII_W 87
 
 class InputManager {
-public:
- InputManager(std::shared_ptr<DocumentManager> doc_man);
- uint32_t HandleShortcuts();
- bool HandleEvents(SDL_Window* p_window_);
+ public:
+  InputManager(std::shared_ptr<DocumentManager> doc_man);
+  uint32_t HandleShortcuts();
+  bool HandleEvents(SDL_Window* p_window_);
 
-private:
- uint32_t action_key;
- std::shared_ptr<DocumentManager> doc_man_;
+ private:
+  uint32_t action_key;
+  std::shared_ptr<DocumentManager> doc_man_;
 };
 
-}
+}  // namespace linea_one

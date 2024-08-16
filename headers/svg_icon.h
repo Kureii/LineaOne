@@ -20,25 +20,26 @@
  */
 #pragma once
 
-#include <string>
-#include <memory>
+#include <SDL3/SDL.h>
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlrenderer3.h>
-#include <SDL3/SDL.h>
+
+#include <memory>
+#include <string>
 
 namespace linea_one::svg {
-
 
 class SvgIcon {
  public:
   SvgIcon(const std::string& filename, SDL_Renderer* p_renderer);
- ~SvgIcon();
- void Draw(ImVec2 pos, ImVec2 size);
+  ~SvgIcon();
+  void Draw(ImVec2 pos, ImVec2 size);
+
  private:
- SDL_Renderer* p_renderer_;
- SDL_Texture* p_texture_;
- int width_, height_;
+  SDL_Renderer* p_renderer_;
+  SDL_Texture* p_texture_;
+  int width_, height_;
 };
 
-} // linea_one::svg
+}  // namespace linea_one::svg

@@ -20,15 +20,15 @@
  */
 #pragma once
 
+#include <document.h>
+
 #include <cstdint>
 #include <vector>
-
-#include <document.h>
 
 namespace linea_one {
 
 class DocumentManager {
-public:
+ public:
   DocumentManager();
   void CreateNewDocument();
   /*Never call this function before "CloseDocumentWithCheck" */
@@ -41,11 +41,12 @@ public:
   [[nodiscard]] int32_t GetDocToClose() const;
   void SetCurrentDocumentIndex(int32_t const index);
   void SetDocToClose(int32_t const index);
-private:
+
+ private:
   std::vector<Document> documents_;
   uint64_t new_doc_counter = 0;
   int32_t current_document_ = -1;
   int32_t doc_to_close_ = -1;
 };
 
-} // linea_one
+}  // namespace linea_one

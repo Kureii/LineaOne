@@ -24,8 +24,9 @@
 
 namespace linea_one::ui {
 
-UiManager::UiManager(const std::shared_ptr<DocumentManager>& p_doc_man, std::shared_ptr<SDL_Renderer> p_renderer)
-    : p_doc_man_(p_doc_man), p_renderer_(p_renderer) {
+UiManager::UiManager(const std::shared_ptr<DocumentManager>& p_doc_man,
+  std::shared_ptr<SDL_Renderer> p_renderer)
+  : p_doc_man_(p_doc_man), p_renderer_(p_renderer) {
   p_main_menu_ = std::make_unique<UiMainMenu>(p_doc_man_);
   p_doc_tab_ = std::make_unique<UiDocumentTab>(p_renderer_);
   p_modal_dialogs_ = std::make_unique<UiModalDialogs>(p_doc_man_);
@@ -55,7 +56,7 @@ void UiManager::RenderTabs() {
     for (int32_t i = 0; i < p_doc_man_->DocumentSize(); ++i) {
       bool open = true;
       if (ImGui::BeginTabItem(p_doc_man_->GetSpecificDocument(i).name.c_str(),
-                              &open, ImGuiTabItemFlags_None)) {
+            &open, ImGuiTabItemFlags_None)) {
         p_doc_man_->SetCurrentDocumentIndex(i);
         ImGui::EndTabItem();
       }
@@ -71,7 +72,7 @@ void UiManager::RenderTabs() {
       }
     }
     if (ImGui::TabItemButton(
-            "+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
+          "+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
       p_doc_man_->CreateNewDocument();
     }
     ImGui::EndTabBar();
@@ -81,7 +82,6 @@ void UiManager::RenderTabs() {
 void UiManager::RenderTabContent(Document& doc) const {
   p_doc_tab_->Render(doc);
 }
-
 
 void UiManager::SetShowUnsavedDialog(const bool show_unsaved_dialog) {
   show_unsaved_dialog_ = show_unsaved_dialog;
@@ -99,7 +99,6 @@ void UiManager::SetStopRendering(const bool stop_rendering) {
 void UiManager::SetSharedVars() const {
   p_main_menu_->SetShowUnsavedDialog(show_unsaved_dialog_);
   p_modal_dialogs_->SetShowUnsavedDialog(show_unsaved_dialog_);
-
 }
 
-}  // namespace linea_one
+}  // namespace linea_one::ui

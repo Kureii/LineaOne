@@ -23,19 +23,18 @@
 namespace linea_one::ui {
 
 UiModalDialogs::UiModalDialogs(
-    const std::shared_ptr<DocumentManager> &p_doc_man)
-    : p_doc_man_(p_doc_man) {}
+  const std::shared_ptr<DocumentManager> &p_doc_man)
+  : p_doc_man_(p_doc_man) {}
 
 void UiModalDialogs::RenderUnsavedChanges() {
   ImGui::OpenPopup("Unsaved Changes");
 
-  if (ImGui::BeginPopupModal("Unsaved Changes", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
-    ImGui::Text(
-        "Document '%s' has unsaved changes. Do you want to save before "
-        "closing?",
-        p_doc_man_->GetSpecificDocument(p_doc_man_->GetDocToClose())
-            .name.c_str());
+  if (ImGui::BeginPopupModal(
+        "Unsaved Changes", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+    ImGui::Text("Document '%s' has unsaved changes. Do you want to save before "
+                "closing?",
+      p_doc_man_->GetSpecificDocument(p_doc_man_->GetDocToClose())
+        .name.c_str());
     ImGui::Separator();
 
     if (ImGui::Button("Save", ImVec2(120, 0))) {
@@ -63,6 +62,8 @@ void UiModalDialogs::SetShowUnsavedDialog(const bool show_unsaved_dialog) {
   show_unsaved_dialog_ = show_unsaved_dialog;
 }
 
-bool UiModalDialogs::GetShowUnsavedDialog() const { return show_unsaved_dialog_; }
+bool UiModalDialogs::GetShowUnsavedDialog() const {
+  return show_unsaved_dialog_;
+}
 
 }  // namespace linea_one::ui

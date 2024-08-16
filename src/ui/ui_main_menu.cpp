@@ -24,7 +24,7 @@
 namespace linea_one::ui {
 
 UiMainMenu::UiMainMenu(const std::shared_ptr<DocumentManager> &p_doc_man)
-    : p_doc_man_(p_doc_man) {}
+  : p_doc_man_(p_doc_man) {}
 
 void UiMainMenu::Render() {
   if (ImGui::BeginMenuBar()) {
@@ -61,17 +61,13 @@ void UiMainMenu::SetShowUnsavedDialog(const bool show_unsaved_dialog) {
   show_unsaved_dialog_ = show_unsaved_dialog;
 }
 
-void UiMainMenu::NewFile() const {
-  p_doc_man_->CreateNewDocument();
-}
+void UiMainMenu::NewFile() const { p_doc_man_->CreateNewDocument(); }
 
 void UiMainMenu::CloseFile() {
   if (p_doc_man_->CloseDocumentWithCheck(
-          p_doc_man_->GetCurrentDocumentIndex()) >= 0) {
+        p_doc_man_->GetCurrentDocumentIndex()) >= 0) {
     show_unsaved_dialog_ = true;
   }
-
 }
-
 
 }  // namespace linea_one::ui

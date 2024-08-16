@@ -19,16 +19,14 @@
  * Created by kureii on 8/11/24
  */
 
-#include <input_manager.h>
-
 #include <SDL3/SDL_events.h>
-#include <imgui_impl_sdl3.h>
-
 #include <imgui.h>
+#include <imgui_impl_sdl3.h>
+#include <input_manager.h>
 
 namespace linea_one {
 InputManager::InputManager(std::shared_ptr<DocumentManager> doc_man)
-    : action_key(0), doc_man_(doc_man) {}
+  : action_key(0), doc_man_(doc_man) {}
 
 uint32_t InputManager::HandleShortcuts() {
   ImGuiIO const& io = ImGui::GetIO();
@@ -39,16 +37,20 @@ uint32_t InputManager::HandleShortcuts() {
     }
     if (ImGui::IsKeyPressed(ImGuiKey_W) && action_key != ASCII_W) {
       if (doc_man_->CloseDocumentWithCheck(
-              doc_man_->GetCurrentDocumentIndex()) >= 0) {
+            doc_man_->GetCurrentDocumentIndex()) >= 0) {
         action_key = ASCII_W;  // ASCI W
       }
     }
   }
-  if (ImGui::IsKeyReleased(ImGuiKey_N) || ImGui::IsKeyReleased(ImGuiKey_LeftCtrl) || ImGui::IsKeyReleased(ImGuiKey_RightCtrl)) {
+  if (ImGui::IsKeyReleased(ImGuiKey_N) ||
+      ImGui::IsKeyReleased(ImGuiKey_LeftCtrl) ||
+      ImGui::IsKeyReleased(ImGuiKey_RightCtrl)) {
     action_key = 0;
   }
-  if (ImGui::IsKeyReleased(ImGuiKey_W) || ImGui::IsKeyReleased(ImGuiKey_LeftCtrl) || ImGui::IsKeyReleased(ImGuiKey_RightCtrl)) {
-    action_key= 0;
+  if (ImGui::IsKeyReleased(ImGuiKey_W) ||
+      ImGui::IsKeyReleased(ImGuiKey_LeftCtrl) ||
+      ImGui::IsKeyReleased(ImGuiKey_RightCtrl)) {
+    action_key = 0;
   }
   return action_key;
 }
@@ -77,4 +79,4 @@ bool InputManager::HandleEvents(SDL_Window* p_window_) {
   return false;
 }
 
-}
+}  // namespace linea_one

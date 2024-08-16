@@ -1,1 +1,14 @@
 BasedOnStyle: Google
+
+AlignAfterOpenBracket: DontAlign
+
+ContinuationIndentWidth: 2
+AllowAllParametersOfDeclarationOnNextLine: true
+BreakConstructorInitializers: BeforeComma
+ConstructorInitializerIndentWidth: 2
+
+IndentWrappedFunctionNames: true
+
+AlwaysBreakBeforeMultilineStrings: false
+BreakBeforeBraces: Attach
+

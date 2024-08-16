@@ -21,13 +21,12 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include <input_manager.h>
-
-#include <memory>
-#include <renderer.h>
-
 #include <document_manager.h>
 #include <imgui.h>
+#include <input_manager.h>
+#include <renderer.h>
+
+#include <memory>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL3/SDL_opengles2.h>
 #else
@@ -37,13 +36,14 @@
 namespace linea_one {
 
 class App {
-public:
+ public:
   App();
   ~App();
 
   bool Init();
   void Run();
-private:
+
+ private:
   static void Update();
 
   bool CreateWindow();
@@ -62,4 +62,4 @@ private:
   int new_doc_counter = 1;
 };
 
-} // linea_ona
+}  // namespace linea_one

@@ -20,9 +20,10 @@
  */
 #pragma once
 
+#include <timeline_event.h>
+
 #include <iostream>
 #include <vector>
-#include <timeline_event.h>
 
 namespace linea_one {
 
@@ -32,4 +33,4 @@ struct Document {
   std::vector<TimelineEvent> events;
 };
 
-}
+}  // namespace linea_one

@@ -32,7 +32,8 @@ namespace linea_one::ui {
 
 class UiManager {
  public:
-  UiManager(const std::shared_ptr<DocumentManager>& p_doc_man, std::shared_ptr<SDL_Renderer> p_renderer);
+  UiManager(const std::shared_ptr<DocumentManager>& p_doc_man,
+    std::shared_ptr<SDL_Renderer> p_renderer);
   void RenderMenu();
   void RenderContent();
   void RenderTabs();
@@ -43,7 +44,6 @@ class UiManager {
   void SetSharedVars() const;
 
  private:
-
   std::shared_ptr<DocumentManager> p_doc_man_;
   std::unique_ptr<UiMainMenu> p_main_menu_;
   std::unique_ptr<UiDocumentTab> p_doc_tab_;

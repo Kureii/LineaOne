@@ -33,4 +33,4 @@ struct TimelineEvent {
   std::string description;
 };
 
-}
+}  // namespace linea_one

@@ -27,16 +27,16 @@
 namespace linea_one::ui {
 
 class UiModalDialogs {
-  public:
+ public:
   explicit UiModalDialogs(const std::shared_ptr<DocumentManager> &p_doc_man);
 
   void RenderUnsavedChanges();
   void SetShowUnsavedDialog(const bool show_unsaved_dialog);
- [[nodiscard]] bool GetShowUnsavedDialog() const;
+  [[nodiscard]] bool GetShowUnsavedDialog() const;
 
  private:
-    std::shared_ptr<DocumentManager> p_doc_man_;
-    bool show_unsaved_dialog_;
+  std::shared_ptr<DocumentManager> p_doc_man_;
+  bool show_unsaved_dialog_;
 };
 
-}
+}  // namespace linea_one::ui

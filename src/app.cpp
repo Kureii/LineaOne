@@ -19,17 +19,14 @@
  * Created by kureii on 8/11/24
  */
 #include <app.h>
+#include <imgui_impl_sdl3.h>
+#include <imgui_impl_sdlrenderer3.h>
 
 #include <format>
 #include <iostream>
 
-#include <imgui_impl_sdl3.h>
-#include <imgui_impl_sdlrenderer3.h>
-
 namespace linea_one {
-App::App()
-    : stop_(false),
-      clear_color_(0.45f, 0.55f, 0.6f, 1.0f) {
+App::App() : stop_(false), clear_color_(0.45f, 0.55f, 0.6f, 1.0f) {
   p_doc_man_ = std::make_shared<DocumentManager>();
   p_input_man_ = std::make_unique<InputManager>(p_doc_man_);
 }
@@ -91,16 +88,16 @@ void App::Update() {
 bool App::CreateWindow() {
   // Create window with SDL_Renderer graphics context
   Uint32 window_flags =
-      SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;
+    SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;
 
-  p_window_ = std::shared_ptr<SDL_Window>(SDL_CreateWindow("LeneaOne",
-                                     1280, 720, window_flags), SDL_DestroyWindow);
+  p_window_ = std::shared_ptr<SDL_Window>(
+    SDL_CreateWindow("LeneaOne", 1280, 720, window_flags), SDL_DestroyWindow);
   if (p_window_ == nullptr) {
     std::cerr << "Error: SDL_CreateWindow(): " << SDL_GetError() << std::endl;
     return false;
   }
-  SDL_SetWindowPosition(p_window_.get(), SDL_WINDOWPOS_CENTERED,
-                        SDL_WINDOWPOS_CENTERED);
+  SDL_SetWindowPosition(
+    p_window_.get(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
   SDL_ShowWindow(p_window_.get());
 
   SDL_SetWindowMinimumSize(p_window_.get(), 960, 720);
@@ -114,9 +111,9 @@ void App::SetupImGui() const {
   ImGuiIO& io = ImGui::GetIO();
   (void)io;
   io.ConfigFlags |=
-      ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+    ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
   io.ConfigFlags |=
-      ImGuiConfigFlags_NavEnableGamepad;             // Enable Gamepad Controls
+    ImGuiConfigFlags_NavEnableGamepad;               // Enable Gamepad Controls
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;  // Enable Docking
 
   // Setup Dear ImGui style
@@ -124,7 +121,8 @@ void App::SetupImGui() const {
   // ImGui::StyleColorsLight();
 
   // Setup Platform/Renderer backends
-  ImGui_ImplSDL3_InitForSDLRenderer(p_window_.get(), p_renderer_->GetSdlRenderer().get());
+  ImGui_ImplSDL3_InitForSDLRenderer(
+    p_window_.get(), p_renderer_->GetSdlRenderer().get());
   ImGui_ImplSDLRenderer3_Init(p_renderer_->GetSdlRenderer().get());
 
   // Load Fonts
@@ -156,4 +154,4 @@ void App::SetupImGui() const {
   // nullptr, io.Fonts->GetGlyphRangesJapanese()); IM_ASSERT(font != nullptr);
 }
 
-}  // namespace linea_ona
+}  // namespace linea_one

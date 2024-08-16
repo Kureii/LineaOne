@@ -34,8 +34,8 @@ class UiMainMenu {
   void SetShowUnsavedDialog(const bool show_unsaved_dialog);
 
  private:
- void NewFile() const;
- void CloseFile();
+  void NewFile() const;
+  void CloseFile();
   std::shared_ptr<DocumentManager> p_doc_man_;
   bool show_unsaved_dialog_ = false;
   bool stop_rendering_ = false;

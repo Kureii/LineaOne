@@ -44,7 +44,7 @@ void DocumentManager::CloseDocument() {
     documents_.erase(documents_.begin() + doc_to_close_);
     if (current_document_ >= documents_.size()) {
       current_document_ =
-          static_cast<int>(documents_.empty() ? -1 : documents_.size() - 1);
+        static_cast<int>(documents_.empty() ? -1 : documents_.size() - 1);
     }
   }
 }
@@ -74,9 +74,7 @@ int32_t DocumentManager::GetCurrentDocumentIndex() const {
   return current_document_;
 }
 
-int32_t DocumentManager::GetDocToClose() const {
-  return doc_to_close_;
-}
+int32_t DocumentManager::GetDocToClose() const { return doc_to_close_; }
 
 void DocumentManager::SetCurrentDocumentIndex(int32_t const index) {
   current_document_ = index;

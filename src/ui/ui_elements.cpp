@@ -28,7 +28,7 @@
 namespace linea_one::ui::elements {
 
 void VerticalSeparator(const float height, const float x_offset,
-                       const float y_offset, const ImColor color) {
+  const float y_offset, const ImColor color) {
   ImVec2 p_start = ImGui::GetCursorScreenPos();
   p_start.x += x_offset;
   p_start.y += y_offset;
@@ -39,16 +39,16 @@ void VerticalSeparator(const float height, const float x_offset,
   // Získej ImDrawList a přidej čáru
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
   draw_list->AddLine(p_start, p_end, color,
-                     1.0f);  // Poslední argument je šířka čáry (1 pixel)
+    1.0f);  // Poslední argument je šířka čáry (1 pixel)
 
   // Posuň kurzor dolů, pokud potřebuješ další vykreslování pod separátorem
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() + y_offset + height);
 }
 
 void RenderIcon(std::shared_ptr<svg::SvgIcon> icon, float icon_padding,
-                float icon_height, float icon_width, ImVec2 cursor_pos) {
+  float icon_height, float icon_width, ImVec2 cursor_pos) {
   ImVec2 icon_pos(cursor_pos.x + icon_padding,
-                  cursor_pos.y + icon_height / 2 - icon_width / 2);
+    cursor_pos.y + icon_height / 2 - icon_width / 2);
   if (icon_height > icon_width) {
     icon->Draw(icon_pos, ImVec2(icon_width, icon_width));
   } else {
@@ -57,16 +57,16 @@ void RenderIcon(std::shared_ptr<svg::SvgIcon> icon, float icon_padding,
 }
 
 bool RenderIconButton(std::shared_ptr<svg::SvgIcon> icon, float icon_padding,
-                      float icon_height, float icon_width, float button_padding,
-                      float button_height, float button_width,
-                      ImVec2 icon_pos, ImVec2 button_pos,
-                      const std::function<void()>& callback) {
+  float icon_height, float icon_width, float button_padding,
+  float button_height, float button_width, ImVec2 icon_pos, ImVec2 button_pos,
+  const std::function<void()>& callback) {
   ImGui::SetCursorScreenPos(
-      ImVec2(button_pos.x + button_padding, button_pos.y + button_padding));
+    ImVec2(button_pos.x + button_padding, button_pos.y + button_padding));
 
-  bool clicked = ImGui::Button("##Button 1", ImVec2(button_width, button_height));
+  bool clicked =
+    ImGui::Button("##Button 1", ImVec2(button_width, button_height));
   ImGui::SetCursorScreenPos(
-      ImVec2(icon_pos.x + icon_padding * 2, icon_pos.y + icon_padding * 2));
+    ImVec2(icon_pos.x + icon_padding * 2, icon_pos.y + icon_padding * 2));
   RenderIcon(icon, icon_padding, icon_height, icon_width, icon_pos);
 
   if (clicked && callback) {

@@ -26,14 +26,12 @@
 namespace linea_one {
 
 Renderer::Renderer(const std::shared_ptr<SDL_Window>& p_window,
-                   const std::shared_ptr<DocumentManager>& doc_man)
-    : p_window_(p_window), p_doc_man_(doc_man) {
-}
+  const std::shared_ptr<DocumentManager>& doc_man)
+  : p_window_(p_window), p_doc_man_(doc_man) {}
 
 bool Renderer::Init() {
   p_renderer_ = std::shared_ptr<SDL_Renderer>(
-        SDL_CreateRenderer(p_window_.get(), nullptr),
-        SDL_DestroyRenderer);
+    SDL_CreateRenderer(p_window_.get(), nullptr), SDL_DestroyRenderer);
   SDL_SetRenderVSync(p_renderer_.get(), 1);
 
   if (p_renderer_ == nullptr) {
@@ -48,10 +46,9 @@ void Renderer::Render() const {
   ImGui::SetNextWindowPos(ImVec2(0, 0));
   ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
   ImGui::Begin("Fullscreen Window", nullptr,
-               ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
-                   ImGuiWindowFlags_NoResize |
-                   ImGuiWindowFlags_NoBringToFrontOnFocus |
-                   ImGuiWindowFlags_MenuBar);
+    ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
+      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoBringToFrontOnFocus |
+      ImGuiWindowFlags_MenuBar);
   p_ui_man_->RenderMenu();
   p_ui_man_->RenderContent();
   p_ui_man_->SetSharedVars();
@@ -61,22 +58,19 @@ void Renderer::Render() const {
   ImGui::Render();
   SDL_SetRenderDrawColor(p_renderer_.get(), 0, 0, 0, 255);
   SDL_RenderClear(p_renderer_.get());
-  ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(),
-                                        p_renderer_.get());
+  ImGui_ImplSDLRenderer3_RenderDrawData(
+    ImGui::GetDrawData(), p_renderer_.get());
   SDL_RenderPresent(p_renderer_.get());
-
 }
 
 void Renderer::SetShowUnsavedDialog(const bool show_unsaved_dialog) const {
   p_ui_man_->SetShowUnsavedDialog(show_unsaved_dialog);
 }
 
-std::shared_ptr<SDL_Renderer> Renderer::GetSdlRenderer() {
-  return p_renderer_;
-}
+std::shared_ptr<SDL_Renderer> Renderer::GetSdlRenderer() { return p_renderer_; }
 
 [[nodiscard]] bool Renderer::GetStopRendering() const {
   return p_ui_man_->GetStopRendering();
 }
 
-}  // namespace linea_one::ui
+}  // namespace linea_one
