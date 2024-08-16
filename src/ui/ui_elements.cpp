@@ -37,7 +37,7 @@ void VerticalSeparator(const float height, const float x_offset,
 
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
   draw_list->AddLine(p_start, p_end, color,
-    0.5f);
+    1);
 
   ImGui::SetCursorPosY(ImGui::GetCursorPosY() + y_offset + height);
 }
