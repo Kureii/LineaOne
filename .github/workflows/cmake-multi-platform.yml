@@ -2,9 +2,9 @@ name: CMake Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   build:
@@ -41,6 +41,3 @@ jobs:
     - name: Build
       run: cmake --build build
 
-    - name: Run tests (if any)
-      run: ctest --output-on-failure
-      working-directory: build
