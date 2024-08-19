@@ -20,10 +20,13 @@
  */
 #include "ui/ui_elements.h"
 
+#include <imgui_internal.h>
+
 #include <functional>
 #include <iostream>
-#include <ostream>
 #include <sstream>
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 namespace linea_one::ui::elements {
 
@@ -72,6 +75,53 @@ bool RenderIconButton(std::string& name, std::shared_ptr<svg::SvgIcon> icon,
   }
 
   return clicked;
+}
+
+void RenderSpinner(
+  const char* label, const char* display_text, float radius, int thickness, float speed, float arc_length, ImVec4 color) {
+  ImGuiWindow* window = ImGui::GetCurrentWindow();
+  if (window->SkipItems)
+    return;
+
+  ImGuiContext& g = *GImGui;
+  const ImGuiStyle& style = g.Style;
+  const ImGuiID id = window->GetID(label);
+
+  ImVec2 pos = window->DC.CursorPos;
+  ImVec2 size((radius) * 2, (radius + style.FramePadding.y) * 2);
+
+  const ImRect bb(pos, ImVec2(pos.x + size.x, pos.y + size.y));
+  ImGui::ItemSize(bb, style.FramePadding.y);
+  if (!ImGui::ItemAdd(bb, id))
+    return;
+
+  window->DrawList->PathClear();
+
+  int num_segments = 30;
+  float start = (float)ImGui::GetTime() * speed;
+  start = fmodf(start, 2.0f * M_PI);
+
+  const float a_min = start;
+  const float a_max = a_min + arc_length * 2.0f * M_PI;
+
+  const ImVec2 centre = ImVec2(pos.x + radius, pos.y + radius + style.FramePadding.y);
+
+  for (int i = 0; i <= num_segments; i++)
+  {
+    const float a = a_min + ((float)i / (float)num_segments) * (a_max - a_min);
+    window->DrawList->PathLineTo(ImVec2(centre.x + ImCos(a) * radius,
+                                        centre.y + ImSin(a) * radius));
+  }
+
+  window->DrawList->PathStroke(ImGui::GetColorU32(color), false, (float)thickness);
+
+  auto text_size = ImGui::CalcTextSize(display_text);
+  if (text_size.x > radius) {
+    ImGui::SetCursorPos(ImVec2(pos.x - (text_size.x - radius)/2 , pos.y + thickness+2));
+  } else {
+    ImGui::SetCursorPos(ImVec2(pos.x - radius / 2 , pos.y + thickness+2));
+  }
+  ImGui::Text(display_text);
 }
 
 }  // namespace linea_one::ui::elements

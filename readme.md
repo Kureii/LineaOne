@@ -15,7 +15,7 @@ Dependencies:
   - [x] Popup when closing unsaved window
   - [x] Create timeline event
   - [x] Remove timeline event
-  - [ ] Sort timeline events
+  - [x] Sort timeline events
   - [x] Drag and drop move events
   - [x] Show timeline
   - [ ] Save file (*.jsonlo)

@@ -20,11 +20,14 @@
  */
 #pragma once
 #include <document.h>
+#include <document_manager.h>
 #include <svg_icon.h>
 #include <ui/ui_draw_timeline.h>
 
-
+#include <atomic>
+#include <functional>
 #include <memory>
+#include <thread>
 
 #define EVENT_CONTAINER_HEIGHT 105
 #define EVENT_CONTAINER_HEIGHT_EXPANDED 139
@@ -44,13 +47,17 @@ enum e_dating { kBC = 0, kAC };
 
 class UiDocumentTab {
  public:
-  explicit UiDocumentTab(const std::shared_ptr<SDL_Renderer>& p_renderer);
+  explicit UiDocumentTab(const std::shared_ptr<SDL_Renderer>& p_renderer,
+    std::shared_ptr<DocumentManager> p_doc_man);
   ~UiDocumentTab();
-  void Render(Document& document);
+  void Render(Document& document, uint64_t index);
   void AddNewEvent(Document& document);
+  void StartSort(Document& document, uint64_t index,
+    const std::function<void(Document& document, uint64_t index)>& callback);
+  [[nodiscard]] bool IsSorting();
 
  private:
-  inline void RenderLeftBox(Document& document);
+  inline void RenderLeftBox(Document& document, uint64_t index);
   inline void RenderRightBox(Document& document);
   inline void RenderEventBox(
     Document& document, TimelineEvent& event, uint64_t order);
@@ -64,12 +71,15 @@ class UiDocumentTab {
   inline void DeleteEvent(Document& doc, const TimelineEvent& event);
   inline void SwapEvents(
     Document& document, uint64_t source_index, uint64_t target_index);
+  inline void RenderSort(Document& document, uint64_t index,
+    ImVec2 content_size);
 
   std::shared_ptr<SDL_Renderer> p_renderer_;
   std::shared_ptr<svg::SvgIcon> p_drag_icon_;
   std::shared_ptr<svg::SvgIcon> p_delete_icon_;
   std::shared_ptr<svg::SvgIcon> p_arrow_drop_up_icon_;
   std::shared_ptr<svg::SvgIcon> p_arrow_drop_down_icon_;
+  std::shared_ptr<DocumentManager> p_doc_man_;
   char* a_buffer_headline_;
   char* a_buffer_description_;
   int index_bc_ac_ = kAC;
@@ -77,6 +87,8 @@ class UiDocumentTab {
   int year_, new_year_;
   uint64_t last_id_ = 0;
   float left_panel_width_ = MIN_SIZE_LEFT_PANEL;
+  std::atomic<bool> is_sorting_{false};
+  std::jthread sorting_thread_;
 };
 
 }  // namespace linea_one::ui

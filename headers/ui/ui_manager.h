@@ -39,7 +39,7 @@ class UiManager {
   void RenderMenu();
   void RenderContent();
   void RenderTabs();
-  void RenderTabContent(Document& doc) const;
+  void RenderTabContent(Document& doc, uint64_t index) const;
   void SetShowUnsavedDialog(const bool show_unsaved_dialog);
   [[nodiscard]] bool GetStopRendering() const;
   void SetStopRendering(const bool stop_rendering);
@@ -56,6 +56,7 @@ class UiManager {
   bool show_unsaved_dialog_ = false;
   bool stop_rendering_ = false;
   bool new_tab_request_ = false;
+  bool sort_request_ = false;
 };
 
 }  // namespace linea_one::ui

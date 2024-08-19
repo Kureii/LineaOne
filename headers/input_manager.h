@@ -27,7 +27,7 @@
 #include <memory>
 
 namespace linea_one {
-
+#define ASCII_S 83
 #define ASCII_A 65
 #define ASCII_N 78
 #define ASCII_W 87

@@ -29,7 +29,7 @@ UiManager::UiManager(const std::shared_ptr<DocumentManager>& p_doc_man,
     const std::shared_ptr<InputManager>& p_input_man)
   : p_doc_man_(p_doc_man), p_renderer_(p_renderer), p_input_man_(p_input_man) {
   p_main_menu_ = std::make_unique<UiMainMenu>(p_doc_man_);
-  p_doc_tab_ = std::make_shared<UiDocumentTab>(p_renderer_);
+  p_doc_tab_ = std::make_shared<UiDocumentTab>(p_renderer_, p_doc_man_);
   p_modal_dialogs_ = std::make_unique<UiModalDialogs>(p_doc_man_);
 }
 
@@ -43,14 +43,23 @@ void UiManager::RenderMenu() {
 void UiManager::RenderContent() {
   RenderTabs();
   if (const auto current_document = p_doc_man_->GetCurrentDocument()) {
-
-    RenderTabContent(*current_document);
-    if (p_input_man_->HandleShortcuts() == ASCII_A && new_tab_request_ == false) {
+    auto current_document_index = p_doc_man_->GetCurrentDocumentIndex();
+    RenderTabContent(*current_document,  current_document_index);
+    if (p_input_man_->HandleShortcuts() == ASCII_S && sort_request_ == false) {
+      sort_request_ = true;
+      p_doc_tab_->StartSort(*current_document,  current_document_index, [this](Document& document_document, uint64_t index_index) {
+        p_doc_man_->SetDocOnIndex(document_document, index_index);
+      });
+    }
+    if (p_input_man_->HandleShortcuts() == ASCII_A && new_tab_request_ == false && !p_doc_tab_->IsSorting()) {
       p_doc_tab_->AddNewEvent(*current_document);
       new_tab_request_ = true;
     }
     if (p_input_man_->HandleShortcuts() == 0 && new_tab_request_ == true) {
       new_tab_request_ = false;
+    }
+    if (p_input_man_->HandleShortcuts() == 0 && sort_request_ == true && p_doc_tab_->IsSorting() == false) {
+      sort_request_ = false;
     }
 
     if (show_unsaved_dialog_) {
@@ -88,9 +97,8 @@ void UiManager::RenderTabs() {
   }
 }
 
-void UiManager::RenderTabContent(Document& doc) const {
-  p_doc_tab_->Render(doc);
-
+void UiManager::RenderTabContent(Document& doc, uint64_t index) const {
+  p_doc_tab_->Render(doc, index);
 }
 
 void UiManager::SetShowUnsavedDialog(const bool show_unsaved_dialog) {

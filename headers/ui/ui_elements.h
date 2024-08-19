@@ -39,4 +39,7 @@ extern bool RenderIconButton(
   float button_height, float button_width, ImVec2 button_pos,
   const std::function<void()>& callback = []() {});
 
+void RenderSpinner(const char* label, const char* display_text, float radius, int thickness, float speed = 1.0f, float arc_length = 0.8f,
+  ImVec4 color = ImGui::GetStyle().Colors[ImGuiCol_Button]);
+
 }  // namespace linea_one::ui::elements

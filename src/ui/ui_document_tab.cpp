@@ -28,8 +28,12 @@
 
 namespace linea_one::ui {
 
-UiDocumentTab::UiDocumentTab(const std::shared_ptr<SDL_Renderer>& p_renderer)
-  : p_renderer_(p_renderer), year_(1999), new_year_(1999) {
+UiDocumentTab::UiDocumentTab(const std::shared_ptr<SDL_Renderer>& p_renderer,
+  std::shared_ptr<DocumentManager> p_doc_man)
+  : p_renderer_(p_renderer)
+  , p_doc_man_(p_doc_man)
+  , year_(1999)
+  , new_year_(1999) {
   p_drag_icon_ =
     std::make_shared<svg::SvgIcon>(DRAG_INDICATOR_ICON_PATH, p_renderer.get());
   p_delete_icon_ =
@@ -53,7 +57,7 @@ UiDocumentTab::~UiDocumentTab() {
   if (a_buffer_description_) delete[] a_buffer_description_;
 }
 
-void UiDocumentTab::Render(Document& document) {
+void UiDocumentTab::Render(Document& document, uint64_t index) {
   const ImVec2 content_size = ImGui::GetContentRegionAvail();
 
   constexpr float minWidth = MIN_SIZE_LEFT_PANEL;
@@ -66,7 +70,7 @@ void UiDocumentTab::Render(Document& document) {
   ImGui::BeginChild(
     "LeftPanel", ImVec2(left_panel_width_, content_size.y), true);
 
-  RenderLeftBox(document);
+  RenderLeftBox(document, index);
 
   ImGui::EndChild();
 
@@ -102,7 +106,24 @@ void UiDocumentTab::AddNewEvent(Document& document) {
   new_year_++;
 }
 
-void UiDocumentTab::RenderLeftBox(Document& document) {
+void UiDocumentTab::StartSort(Document& document, uint64_t index,
+  const std::function<void(Document& document, uint64_t index)>& callback) {
+  is_sorting_ = true;
+  sorting_thread_ = std::jthread([this, &document, index, callback]() {
+    std::ranges::sort(
+      document.events, [](const TimelineEvent& a, const TimelineEvent& b) {
+        return a.year < b.year;
+      });
+    is_sorting_ = false;
+    if (callback) {
+      callback(document, index);
+    }
+  });
+}
+
+bool UiDocumentTab::IsSorting() { return is_sorting_; }
+
+void UiDocumentTab::RenderLeftBox(Document& document, uint64_t index) {
   ImVec2 content_size = ImGui::GetContentRegionAvail();
 
   float topPanelHeight = content_size.y - 34.0f;
@@ -114,7 +135,6 @@ void UiDocumentTab::RenderLeftBox(Document& document) {
     document.events.emplace_back(last_id_, new_year_, "", false, "");
     last_id_++;
     new_year_++;
-
   }
   for (uint64_t i = 0; i < document.events.size(); ++i) {
     RenderEventBox(document, document.events[i], i);
@@ -133,20 +153,17 @@ void UiDocumentTab::RenderLeftBox(Document& document) {
   ImGui::EndChild();
   ImGui::PopStyleColor();
 
-  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 0.3f));
-  ImGui::BeginChild("LeftPanelSort", ImVec2(content_size.x, 30.0f), false);
-  ImVec2 content_size_button = ImGui::GetContentRegionAvail();
-  ImGui::Button("Sort", ImVec2(content_size_button.x, content_size_button.y));
-  ImGui::EndChild();
-  ImGui::PopStyleColor();
+  RenderSort(document, index, content_size);
 }
 
 void UiDocumentTab::RenderRightBox(Document& document) {
   document.state.minYear = std::numeric_limits<int>::max();
   document.state.maxYear = std::numeric_limits<int>::min();
   for (const auto& event : document.events) {
-    document.state.minYear = std::ranges::min(document.state.minYear, event.year);
-    document.state.maxYear = std::ranges::max(document.state.maxYear, event.year);
+    document.state.minYear =
+      std::ranges::min(document.state.minYear, event.year);
+    document.state.maxYear =
+      std::ranges::max(document.state.maxYear, event.year);
   }
 
   UiDrawTimeline::Render(document.events, document.state);
@@ -380,6 +397,41 @@ void UiDocumentTab::SwapEvents(
       source_index < document.events.size() && target_index >= 0 &&
       target_index < document.events.size()) {
     std::swap(document.events[source_index], document.events[target_index]);
+  }
+}
+
+void UiDocumentTab::RenderSort(
+  Document& document, uint64_t index, ImVec2 content_size) {
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 0.3f));
+  ImGui::BeginChild("LeftPanelSort", ImVec2(content_size.x, 30.0f), false);
+  if (ImVec2 content_size_button = ImGui::GetContentRegionAvail();
+      ImGui::Button(
+        "Sort", ImVec2(content_size_button.x, content_size_button.y))) {
+    StartSort(document, index,
+      [this](Document& document_document, uint64_t index_index) {
+        p_doc_man_->SetDocOnIndex(document_document, index_index);
+      });
+  }
+
+  if (ImGui::IsItemHovered(
+        ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay)) {
+    ImGui::BeginTooltip();
+    ImGui::TextUnformatted("Shift+A");
+    ImGui::EndTooltip();
+  }
+  ImGui::EndChild();
+  ImGui::PopStyleColor();
+  if (is_sorting_) {
+    ImGui::SetCursorPos(ImVec2(0, 0));
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 0.7f));
+    ImGui::BeginChild(
+      "RightPanelSort", content_size, false);  // Použijte ImVec2 přímo
+    ImGui::SetCursorPos(
+      ImVec2(content_size.x / 2 - 20, content_size.y / 2 - 20));
+    elements::RenderSpinner(
+      "##sorting_screen", "Sorting...", 20, 4, 4.5f, 0.75f);
+    ImGui::EndChild();
+    ImGui::PopStyleColor();
   }
 }
 

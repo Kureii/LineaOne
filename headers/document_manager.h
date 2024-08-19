@@ -41,6 +41,7 @@ class DocumentManager {
   [[nodiscard]] int32_t GetDocToClose() const;
   void SetCurrentDocumentIndex(int32_t const index);
   void SetDocToClose(int32_t const index);
+  void SetDocOnIndex(Document& document, int64_t const index);
 
  private:
   std::vector<Document> documents_;

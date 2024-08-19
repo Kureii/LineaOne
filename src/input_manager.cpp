@@ -47,11 +47,20 @@ uint32_t InputManager::HandleShortcuts() {
     if (ImGui::IsKeyPressed(ImGuiKey_A) && action_key != ASCII_A) {
       action_key = ASCII_A;
     }
+    if (ImGui::IsKeyPressed(ImGuiKey_S) && action_key != ASCII_S) {
+      action_key = ASCII_S;
+    }
   }
 
   if (ImGui::IsKeyReleased(ImGuiKey_LeftShift) ||
       ImGui::IsKeyReleased(ImGuiKey_RightShift) ||
       ImGui::IsKeyReleased(ImGuiKey_A)) {
+    action_key = 0;
+  }
+
+  if (ImGui::IsKeyReleased(ImGuiKey_LeftShift) ||
+      ImGui::IsKeyReleased(ImGuiKey_RightShift) ||
+      ImGui::IsKeyReleased(ImGuiKey_S)) {
     action_key = 0;
   }
 

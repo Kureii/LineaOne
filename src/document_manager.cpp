@@ -20,6 +20,7 @@
  */
 #include <document_manager.h>
 
+#include <algorithm>
 #include <format>
 
 namespace linea_one {
@@ -100,5 +101,12 @@ void DocumentManager::SetCurrentDocumentIndex(int32_t const index) {
 void DocumentManager::SetDocToClose(int32_t const index) {
   doc_to_close_ = index;
 }
+
+void DocumentManager::SetDocOnIndex(Document& document, int64_t const index) {
+  if (index >= 0 && index < documents_.size()) {
+    documents_[index] = document;
+  }
+}
+
 
 }  // namespace linea_one
