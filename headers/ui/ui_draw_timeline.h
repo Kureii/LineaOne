@@ -15,24 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
- * File: document.h
- * Created by kureii on 8/11/24
+ * File: ui_draw_timeline.h
+ * Created by kureii on 8/19/24
  */
 #pragma once
 
-#include <timeline_event.h>
+#include <document.h>
 #include <timeline_state.h>
 
-#include <iostream>
-#include <vector>
+namespace linea_one::ui {
 
-namespace linea_one {
-
-struct Document {
-  std::string name;
-  bool saved;
-  TimelineState state;
-  std::vector<TimelineEvent> events;
+struct TextPosition {
+  ImVec2 pos;
+  float width;
 };
 
-}  // namespace linea_one
+class UiDrawTimeline {
+ public:
+  UiDrawTimeline() = default;
+  static void Render(const std::vector<TimelineEvent>& events, TimelineState& state);
+
+private:
+  static void DrawTimeline(const std::vector<TimelineEvent>& events, TimelineState& state);
+  static float MapYearToPixel(int year, const TimelineState& state, float startX, float width);
+  static void HandleInteraction(TimelineState& state, uint64_t events_size);
+};
+
+}  // namespace linea_one::ui

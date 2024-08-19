@@ -90,13 +90,9 @@ void UiDocumentTab::Render(Document& document) {
 
   // Right panel
   ImGui::SameLine(0, 0);
-  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.3f, 1.0f));
-  ImGui::BeginChild("RightPanel", ImVec2(0, content_size.y), true);
 
   RenderRightBox(document);
 
-  ImGui::EndChild();
-  ImGui::PopStyleColor();
   ImGui::PopStyleVar(2);
 }
 
@@ -118,6 +114,7 @@ void UiDocumentTab::RenderLeftBox(Document& document) {
     document.events.emplace_back(last_id_, new_year_, "", false, "");
     last_id_++;
     new_year_++;
+
   }
   for (uint64_t i = 0; i < document.events.size(); ++i) {
     RenderEventBox(document, document.events[i], i);
@@ -145,9 +142,32 @@ void UiDocumentTab::RenderLeftBox(Document& document) {
 }
 
 void UiDocumentTab::RenderRightBox(Document& document) {
-  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-  ImGui::Text("Right panel");
-  ImGui::PopStyleColor();
+  document.state.minYear = std::numeric_limits<int>::max();
+  document.state.maxYear = std::numeric_limits<int>::min();
+  for (const auto& event : document.events) {
+    document.state.minYear = std::ranges::min(document.state.minYear, event.year);
+    document.state.maxYear = std::ranges::max(document.state.maxYear, event.year);
+  }
+
+  UiDrawTimeline::Render(document.events, document.state);
+
+  auto window_size = ImGui::GetWindowSize();
+  auto info_text = std::format("zoom: {}\noffset: {}", document.state.zoom,
+    document.state.offset == 0 ? 0 : document.state.offset * -1);
+  auto button_text = "Reset navigation";
+  auto info_text_size = ImGui::CalcTextSize(info_text.c_str());
+  auto button_text_size = ImGui::CalcTextSize(button_text);
+
+  auto button_size = ImVec2(button_text_size.x + 20, button_text_size.y + 10);
+  ImGui::SetCursorScreenPos(ImVec2(window_size.x - (button_size.x + 10),
+    window_size.y - (button_size.y + info_text_size.y + 20)));
+  ImGui::Text(info_text.c_str());
+  ImGui::SetCursorScreenPos(ImVec2(
+    window_size.x - (button_size.x + 10), window_size.y - button_size.y - 10));
+  if (ImGui::Button(button_text, button_size)) {
+    document.state.zoom = 1.0f;
+    document.state.offset = 0.0f;
+  }
 }
 
 void UiDocumentTab::RenderEventBox(

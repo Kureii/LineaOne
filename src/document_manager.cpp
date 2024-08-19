@@ -29,8 +29,25 @@ DocumentManager::DocumentManager() { documents_ = std::vector<Document>(); }
 void DocumentManager::CreateNewDocument() {
   new_doc_counter++;
   Document new_doc = {std::format("New Document {}", new_doc_counter), false};
+  new_doc.state.zoom = 1.0f;
+  new_doc.state.offset = 0.0f;
+  new_doc.state.minYear = std::numeric_limits<int>::max();
+  new_doc.state.maxYear = std::numeric_limits<int>::min();
+
+  for (const auto& event : new_doc.events) {
+    new_doc.state.minYear = std::min(new_doc.state.minYear, event.year);
+    new_doc.state.maxYear = std::max(new_doc.state.maxYear, event.year);
+  }
+
+  // Ensure we have a valid range even if there are no events
+  if (new_doc.state.minYear == std::numeric_limits<int>::max()) {
+    new_doc.state.minYear = 2000;
+    new_doc.state.maxYear = 2000;
+  }
+
   documents_.push_back(new_doc);
   current_document_ = static_cast<int32_t>(documents_.size() - 1);
+
 }
 
 Document* DocumentManager::GetCurrentDocument() {

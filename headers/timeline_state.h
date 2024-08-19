@@ -15,24 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
- * File: document.h
- * Created by kureii on 8/11/24
+ * File: timeline_state.h
+ * Created by kureii on 8/19/24
  */
 #pragma once
 
-#include <timeline_event.h>
-#include <timeline_state.h>
-
-#include <iostream>
-#include <vector>
-
 namespace linea_one {
 
-struct Document {
-  std::string name;
-  bool saved;
-  TimelineState state;
-  std::vector<TimelineEvent> events;
-};
+typedef struct{
+  float zoom = 1.0f;
+  float offset = 0.0f;
+  int minYear = 0;
+  int maxYear = 0;
+}TimelineState;
 
-}  // namespace linea_one
+}
+
