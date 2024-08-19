@@ -17,7 +17,7 @@ Dependencies:
   - [x] Remove timeline event
   - [ ] Sort timeline events
   - [x] Drag and drop move events
-  - [ ] Show timeline
+  - [x] Show timeline
   - [ ] Save file (*.jsonlo)
   - [ ] Load file (*.jsonlo)
   - [ ] Draw timeline in preview
