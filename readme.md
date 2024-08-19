@@ -20,7 +20,6 @@ Dependencies:
   - [x] Show timeline
   - [ ] Save file (*.jsonlo)
   - [ ] Load file (*.jsonlo)
-  - [ ] Draw timeline in preview
   - [ ] Export to SVG
 
 Note: `.jsonlo` is a specific format for this software. At its base, it is a `*.json` file with a specific structure for LineaOne.
