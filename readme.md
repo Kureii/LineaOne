@@ -29,6 +29,7 @@ Note: `.jsonlo` is a specific format for this software. At its base, it is a `*.
 - [ ] Refactoring code
 - [ ] Clear code
 - [ ] Improve memory management
+- [ ] Include boost lib
 
 ### Version 0.3.x - Undo/Redo Functionality
 - [ ] Add undo and redo
