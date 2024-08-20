@@ -23,7 +23,7 @@
 #include <timeline_event.h>
 #include <timeline_state.h>
 
-#include <iostream>
+#include <filesystem>
 #include <vector>
 
 namespace linea_one {
@@ -33,6 +33,7 @@ struct Document {
   bool saved;
   TimelineState state;
   std::vector<TimelineEvent> events;
+  std::filesystem::path path;
 };
 
 }  // namespace linea_one

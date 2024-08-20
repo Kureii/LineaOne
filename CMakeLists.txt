@@ -19,6 +19,16 @@ configure_file(
         src/config.h
 )
 
+include(FetchContent)
+
+FetchContent_Declare(
+        json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG v3.11.3
+)
+
+FetchContent_MakeAvailable(json)
+
 add_subdirectory(lib/nanosvg)
 
 add_compile_options(-g -Wall -Wformat)
@@ -75,5 +85,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} lib/nanosvg/src)
 target_link_libraries(${PROJECT_NAME} PRIVATE
         ${LIBS}
         nanosvg
+        nlohmann_json::nlohmann_json
 )
 
