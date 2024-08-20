@@ -8,7 +8,7 @@ Dependencies:
 
 ## Road map
 
-### Version 0.1.x - First Full Usable App
+### Version 0.1.0 - First Full Usable App
 - [ ] First full worked usable app
   - [x] Create new document
   - [x] Close document
@@ -23,6 +23,9 @@ Dependencies:
   - [ ] Export to SVG
 
 Note: `.jsonlo` is a specific format for this software. At its base, it is a `*.json` file with a specific structure for LineaOne.
+
+### Version 0.1.1
+- [ ] Fix displaying two or more headlines in one year
 
 ### Version 0.2.x - Code Improvement
 - [ ] Refactoring code
