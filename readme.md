@@ -66,3 +66,5 @@ Note: `.jsonlo` is a specific format for this software. At its base, it is a `*.
 - [ ] Documentation completion
 - [ ] Performance optimization
 - [ ] Prepare for official release
+- [ ] Windows installation
+- [ ] debian based distro package
