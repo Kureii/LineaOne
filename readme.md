@@ -27,7 +27,7 @@ Note: `.jsonlo` is a specific format for this software. At its base, it is a `*.
 ### Version 0.1.1
 - [ ] Fix displaying two or more headlines in one year
 
-### Version 0.2.x - Code Improvement
+### Version 0.2.x - Code Improvement (start at 07/2025)
 - [ ] Refactoring code
 - [ ] Clear code
 - [ ] Improve memory management
