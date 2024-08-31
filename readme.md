@@ -2,6 +2,8 @@
 
 Specialized software for creating timelines for presentations.
 
+This app is under development, the current state is very experimental and the code is not pretty
+
 ## Dependencies:
 
 - SDL3
@@ -17,7 +19,7 @@ Specialized software for creating timelines for presentations.
 ## Road map
 
 ### Version 0.1.0 - First Full Usable App
-- [ ] First full worked usable app
+- [x] First full worked usable app
   - [x] Create new document
   - [x] Close document
   - [x] Popup when closing unsaved window
