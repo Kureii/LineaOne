@@ -9,7 +9,7 @@ Specialized software for creating timelines for presentations.
 ## Known issues
 - if two headings are in the same year, they overlap
 - diacritics do not appear
-- untreated document reopening
+- untreated document reopening (same name just rewrite document)
 - displaying files that are not `*.jsonlo` and are not folders
 - showing hidden folders
 - no checking of `*.jsonlo` data
