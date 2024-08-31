@@ -38,6 +38,7 @@ void UiManager::RenderMenu() {
   show_unsaved_dialog_ = p_main_menu_->IsShowUnsavedDialog();
   stop_rendering_ = p_main_menu_->IsStopRendering();
   show_save_dialog_ = p_main_menu_->IsShowSaveDialog();
+  show_load_dialog_ = p_main_menu_->IsShowLoadDialog();
   SetSharedVars();
 }
 
@@ -66,13 +67,20 @@ void UiManager::RenderContent() {
     if (show_unsaved_dialog_) {
       p_modal_dialogs_->RenderUnsavedChanges();
       show_unsaved_dialog_ = p_modal_dialogs_->GetShowUnsavedDialog();
-      show_save_dialog_ = p_modal_dialogs_->GetShowSavedDialog();
+      show_save_dialog_ = p_modal_dialogs_->GetShowSaveDialog();
     }
     if (show_save_dialog_) {
       p_modal_dialogs_->RenderSaveDialog();
-      show_save_dialog_ = p_modal_dialogs_->GetShowSavedDialog();
+      show_save_dialog_ = p_modal_dialogs_->GetShowSaveDialog();
       p_main_menu_->SetShowSaveDialog(show_save_dialog_);
     }
+
+
+  }
+  if (show_load_dialog_) {
+    p_modal_dialogs_->RenderLoadDialog();
+    show_load_dialog_ = p_modal_dialogs_->GetShowLoadDialog();
+    p_main_menu_->SetShowLoadDialog(show_load_dialog_);
   }
 }
 
@@ -124,7 +132,8 @@ void UiManager::SetStopRendering(const bool stop_rendering) {
 void UiManager::SetSharedVars() const {
   p_main_menu_->SetShowUnsavedDialog(show_unsaved_dialog_);
   p_modal_dialogs_->SetShowUnsavedDialog(show_unsaved_dialog_);
-  p_modal_dialogs_->SetShowSavedDialog(show_save_dialog_);
+  p_modal_dialogs_->SetShowSaveDialog(show_save_dialog_);
+  p_modal_dialogs_->SetShowLoadDialog(show_load_dialog_);
   if (show_unsaved_dialog_) {
     p_modal_dialogs_->SetShowUnsavedDialog(false);
     p_modal_dialogs_->RefreshDirectoryContents();

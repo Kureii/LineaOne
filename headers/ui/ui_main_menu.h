@@ -31,17 +31,20 @@ class UiMainMenu {
   void Render();
   [[nodiscard]] bool IsShowUnsavedDialog() const;
   [[nodiscard]] bool IsShowSaveDialog() const;
+  [[nodiscard]] bool IsShowLoadDialog() const;
   [[nodiscard]] bool IsStopRendering() const;
   void SetShowUnsavedDialog(const bool show_unsaved_dialog);
   void SetShowSaveDialog(const bool show_save_dialog);
+  void SetShowLoadDialog(const bool show_save_dialog);
 
  private:
   void NewFile() const;
   void CloseFile();
-  void SaveFile();
+  void SaveFileDialog();
   std::shared_ptr<DocumentManager> p_doc_man_;
   bool show_unsaved_dialog_ = false;
   bool show_save_dialog_ = false;
+  bool show_load_dialog_ = false;
   bool stop_rendering_ = false;
 
 };

@@ -19,7 +19,7 @@ Dependencies:
   - [x] Drag and drop move events
   - [x] Show timeline
   - [x] Save file (*.jsonlo)
-  - [ ] Load file (*.jsonlo)
+  - [x] Load file (*.jsonlo)
   - [ ] Export to SVG
 
 Note: `.jsonlo` is a specific format for this software. At its base, it is a `*.json` file with a specific structure for LineaOne.

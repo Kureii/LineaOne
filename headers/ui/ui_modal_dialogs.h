@@ -32,20 +32,25 @@ class UiModalDialogs {
 
   void RenderUnsavedChanges();
   void RenderSaveDialog();
+  void RenderLoadDialog();
   void RefreshDirectoryContents();
 
   void SetShowUnsavedDialog(const bool show_unsaved_dialog);
-  void SetShowSavedDialog(const bool show_saved_dialog);
+  void SetShowSaveDialog(const bool show_save_dialog);
+  void SetShowLoadDialog(const bool show_load_dialog);
   [[nodiscard]] bool GetShowUnsavedDialog() const;
-  [[nodiscard]] bool GetShowSavedDialog() const;
+  [[nodiscard]] bool GetShowSaveDialog() const;
+  [[nodiscard]] bool GetShowLoadDialog() const;
 
 
  private:
   std::shared_ptr<DocumentManager> p_doc_man_;
   bool show_unsaved_dialog_;
   bool show_save_dialog_;
-  std::filesystem::path current_path = std::filesystem::current_path();
-  std::vector<std::string> dir_contents;
+  bool show_load_dialog_ = false;
+  std::filesystem::path current_path_;
+ std::optional<std::filesystem::path> selected_file_;
+  std::vector<std::string> dir_contents_;
   std::string file_name_ = "Untitled.jsonlo";
   char file_name_buffer_[256];
   int selected_index_ = -1;

@@ -24,7 +24,14 @@ namespace linea_one::ui {
 
 UiModalDialogs::UiModalDialogs(
   const std::shared_ptr<DocumentManager>& p_doc_man)
-  : p_doc_man_(p_doc_man) {}
+  : p_doc_man_(p_doc_man) {
+#if defined(_WIN32) || defined(_WIN64)
+  current_path_ = std::getenv("USERPROFILE");
+#else
+  current_path_ = std::getenv("HOME");
+#endif
+  RefreshDirectoryContents();
+}
 
 void UiModalDialogs::RenderUnsavedChanges() {
   show_unsaved_dialog_ = true;
@@ -75,27 +82,27 @@ void UiModalDialogs::RenderSaveDialog() {
   ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
   if (ImGui::BeginPopupModal(
         "Save As", &show_save_dialog_, ImGuiWindowFlags_AlwaysAutoResize)) {
-    ImGui::Text("Current Path: %s", current_path.string().c_str());
+    ImGui::Text("Current Path: %s", current_path_.string().c_str());
 
     if (ImGui::Button("..")) {
-      if (current_path.has_parent_path()) {
-        current_path = current_path.parent_path();
+      if (current_path_.has_parent_path()) {
+        current_path_ = current_path_.parent_path();
         RefreshDirectoryContents();
       }
     }
 
     // Přidáme oblast pro zobrazení seznamu souborů a složek
     ImGui::BeginChild("File Browser", ImVec2(0, 200), true);
-    for (size_t i = 0; i < dir_contents.size(); i++) {
-      const auto& entry = dir_contents[i];
-      bool is_dir = std::filesystem::is_directory(current_path / entry);
+    for (size_t i = 0; i < dir_contents_.size(); i++) {
+      const auto& entry = dir_contents_[i];
+      bool is_dir = is_directory(current_path_ / entry);
       std::string label = (is_dir ? "[D] " : "    ") + entry;
 
       if (ImGui::Selectable(
             label.c_str(), selected_index_ == static_cast<int>(i))) {
         selected_index_ = static_cast<int>(i);
         if (is_dir) {
-          current_path /= entry;
+          current_path_ /= entry;
           RefreshDirectoryContents();
           selected_index_ = -1;
         } else {
@@ -122,7 +129,7 @@ void UiModalDialogs::RenderSaveDialog() {
         file_name += extension;
       }
 
-      auto full_path = current_path / file_name;
+      auto full_path = current_path_ / file_name;
       p_doc_man_->GetCurrentDocument()->path = full_path;
       p_doc_man_->SaveDocument();
       show_save_dialog_ = false;
@@ -138,26 +145,89 @@ void UiModalDialogs::RenderSaveDialog() {
   }
 }
 
-void UiModalDialogs::RefreshDirectoryContents() {
-  dir_contents.clear();
-  for (const auto& entry : std::filesystem::directory_iterator(current_path)) {
-    dir_contents.push_back(entry.path().filename().string());
+void UiModalDialogs::RenderLoadDialog() {
+  if (show_load_dialog_) {
+    ImGui::OpenPopup("Load File");
   }
-  std::ranges::sort(dir_contents);
+
+  ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
+  if (ImGui::BeginPopupModal(
+        "Load File", &show_load_dialog_, ImGuiWindowFlags_AlwaysAutoResize)) {
+    ImGui::Text("Current Path: %s", current_path_.string().c_str());
+
+    if (ImGui::Button("..")) {
+      if (current_path_.has_parent_path()) {
+        current_path_ = current_path_.parent_path();
+        RefreshDirectoryContents();
+      }
+    }
+    ImGui::BeginChild("File Browser", ImVec2(0, 300), true);
+    for (size_t i = 0; i < dir_contents_.size(); i++) {
+      const auto& entry = dir_contents_[i];
+      std::filesystem::path entry_path = current_path_ / entry;
+      bool is_dir = is_directory(entry_path);
+      std::string label = (is_dir ? "[D] " : "    ") + entry;
+
+      if (ImGui::Selectable(
+            label.c_str(), selected_index_ == static_cast<int>(i))) {
+        selected_index_ = static_cast<int>(i);
+        if (is_dir) {
+          current_path_ /= entry;
+          RefreshDirectoryContents();
+          selected_index_ = -1;
+        } else if (entry_path.extension() == ".jsonlo") {
+          selected_file_ = entry_path;
+        }
+      }
+    }
+    ImGui::EndChild();
+
+    if (selected_file_) {
+      ImGui::Text(
+        "Selected File: %s", selected_file_->filename().string().c_str());
+
+      if (ImGui::Button("Load", ImVec2(120, 0))) {
+        p_doc_man_->LoadDocument(selected_file_.value());
+        show_load_dialog_ = false;
+        ImGui::CloseCurrentPopup();
+      }
+      ImGui::SameLine();
+    }
+
+    if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+      show_load_dialog_ = false;
+      ImGui::CloseCurrentPopup();
+    }
+
+    ImGui::EndPopup();
+  }
+}
+
+void UiModalDialogs::RefreshDirectoryContents() {
+  dir_contents_.clear();
+  for (const auto& entry : std::filesystem::directory_iterator(current_path_)) {
+    dir_contents_.push_back(entry.path().filename().string());
+  }
+  std::ranges::sort(dir_contents_);
 }
 
 void UiModalDialogs::SetShowUnsavedDialog(const bool show_unsaved_dialog) {
   show_unsaved_dialog_ = show_unsaved_dialog;
 }
 
-void UiModalDialogs::SetShowSavedDialog(const bool show_saved_dialog) {
+void UiModalDialogs::SetShowSaveDialog(const bool show_saved_dialog) {
   show_save_dialog_ = show_saved_dialog;
+}
+
+void UiModalDialogs::SetShowLoadDialog(const bool show_load_dialog) {
+  show_load_dialog_ = show_load_dialog;
 }
 
 bool UiModalDialogs::GetShowUnsavedDialog() const {
   return show_unsaved_dialog_;
 }
 
-bool UiModalDialogs::GetShowSavedDialog() const { return show_save_dialog_; }
+bool UiModalDialogs::GetShowSaveDialog() const { return show_save_dialog_; }
 
+bool UiModalDialogs::GetShowLoadDialog() const { return show_load_dialog_; }
 }  // namespace linea_one::ui

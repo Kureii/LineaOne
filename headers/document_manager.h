@@ -45,11 +45,11 @@ class DocumentManager {
   void SetDocToClose(int32_t const index);
   void SetDocOnIndex(Document& document, int64_t const index);
   void SaveDocument();
-  void LoadDocument();
+  void LoadDocument(std::filesystem::path path);
 
  private:
   std::string SerializeDocument(Document &document);
-  Document DeserializeDocument(std::filesystem::path const document_path);
+  Document DeserializeDocument(std::ifstream &json_file);
   std::vector<Document> documents_;
   uint64_t new_doc_counter = 0;
   int32_t current_document_ = -1;

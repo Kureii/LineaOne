@@ -27,7 +27,9 @@
 
 namespace linea_one {
 
-DocumentManager::DocumentManager() { documents_ = std::vector<Document>(); }
+DocumentManager::DocumentManager() {
+  documents_ = std::vector<Document>();
+}
 
 void DocumentManager::CreateNewDocument() {
   new_doc_counter++;
@@ -110,7 +112,7 @@ void DocumentManager::SetDocOnIndex(Document& document, int64_t const index) {
 }
 
 void DocumentManager::SaveDocument() {
-  if (documents_[current_document_].saved || documents_[current_document_].path.empty()) {
+  if (current_document_ < 0 || documents_[current_document_].saved || documents_[current_document_].path.empty()) {
     return;
   }
   std::ofstream file( documents_[current_document_].path, std::ios::binary);
@@ -125,11 +127,20 @@ void DocumentManager::SaveDocument() {
   }
 }
 
-void DocumentManager::LoadDocument() {}
+void DocumentManager::LoadDocument(std::filesystem::path path) {
+  std::ifstream file(path, std::ios::binary);
+  if (file.is_open()) {
+    auto doc = DeserializeDocument(file);
+    doc.path = path;
+    documents_.emplace_back(doc);
+    file.close();
+  }
+}
+
 std::string DocumentManager::SerializeDocument(Document& document) {
   auto json_string = std::format(R"({{
   "Name": "{}",
-  "Version": "{}",
+  "Version": "{}.{}",
   "State": {{
     "Zoom": {},
     "Offset": {}
@@ -158,7 +169,25 @@ std::string DocumentManager::SerializeDocument(Document& document) {
   json_string += "  ]\n}\n";
   return json_string;
 }
+
 Document DocumentManager::DeserializeDocument(
-  std::filesystem::path const document_path) {}
+  std::ifstream &json_file) {
+    nlohmann::json json_data = nlohmann::json::parse(json_file);
+  Document document;
+  document.name = json_data["Name"];
+  document.saved = true;
+  document.state.offset = json_data["State"]["Offset"];
+  document.state.zoom = json_data["State"]["Zoom"];
+  for (uint64_t i = 0; i < json_data["Events"].size(); i++) {
+    TimelineEvent event;
+    event.id = json_data["Events"][i]["Id"];
+    event.year = json_data["Events"][i]["Year"];
+    event.headline = json_data["Events"][i]["Headline"];
+    event.description = json_data["Events"][i]["Description"];
+    event.expanded = json_data["Events"][i]["Expanded"];
+    document.events.emplace_back(event);
+  }
+  return document;
+}
 
 }  // namespace linea_one
