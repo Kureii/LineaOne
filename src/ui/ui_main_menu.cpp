@@ -34,9 +34,16 @@ void UiMainMenu::Render() {
       }
       if (ImGui::MenuItem("Open file")) { /* TODO: Implement */
       }
-      if (ImGui::MenuItem("Save")) { /* TODO: Implement */
+      if (ImGui::MenuItem("Save")) {
+        if (p_doc_man_->GetCurrentDocument()->path.empty()) {
+          show_save_dialog_ = true;
+        }
+        else {
+          p_doc_man_->SaveDocument();
+        }
       }
-      if (ImGui::MenuItem("Save as")) { /* TODO: Implement */
+      if (ImGui::MenuItem("Save as")) {
+        show_save_dialog_ = true;
       }
       if (ImGui::MenuItem("Close file", "Ctrl+W")) {
         CloseFile();
@@ -50,15 +57,22 @@ void UiMainMenu::Render() {
   }
 }
 
-[[nodiscard]] bool UiMainMenu::IsShowUnsavedDialog() const {
+bool UiMainMenu::IsShowUnsavedDialog() const {
   return show_unsaved_dialog_;
 }
-[[nodiscard]] bool UiMainMenu::IsStopRendering() const {
+bool UiMainMenu::IsShowSaveDialog() const {
+  return show_save_dialog_;
+}
+bool UiMainMenu::IsStopRendering() const {
   return stop_rendering_;
 }
 
 void UiMainMenu::SetShowUnsavedDialog(const bool show_unsaved_dialog) {
   show_unsaved_dialog_ = show_unsaved_dialog;
+}
+
+void UiMainMenu::SetShowSaveDialog(const bool show_save_dialog) {
+  show_save_dialog_ = show_save_dialog;
 }
 
 void UiMainMenu::NewFile() const { p_doc_man_->CreateNewDocument(); }
@@ -69,5 +83,13 @@ void UiMainMenu::CloseFile() {
     show_unsaved_dialog_ = true;
   }
 }
+
+void UiMainMenu::SaveFile() {
+ if (p_doc_man_->GetCurrentDocumentIndex() >= 0) {
+   show_save_dialog_ = true;
+ }
+
+}
+
 
 }  // namespace linea_one::ui

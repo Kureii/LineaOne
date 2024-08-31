@@ -54,6 +54,7 @@ class UiManager {
   std::shared_ptr<SDL_Renderer> p_renderer_;
   std::shared_ptr<InputManager> p_input_man_;
   bool show_unsaved_dialog_ = false;
+  bool show_save_dialog_ = false;
   bool stop_rendering_ = false;
   bool new_tab_request_ = false;
   bool sort_request_ = false;

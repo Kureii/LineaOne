@@ -18,10 +18,12 @@
  * File: document_manager.cpp
  * Created by kureii on 8/11/24
  */
+#include <config.h>
 #include <document_manager.h>
 
 #include <algorithm>
 #include <format>
+#include <fstream>
 
 namespace linea_one {
 
@@ -48,7 +50,6 @@ void DocumentManager::CreateNewDocument() {
 
   documents_.push_back(new_doc);
   current_document_ = static_cast<int32_t>(documents_.size() - 1);
-
 }
 
 Document* DocumentManager::GetCurrentDocument() {
@@ -108,5 +109,56 @@ void DocumentManager::SetDocOnIndex(Document& document, int64_t const index) {
   }
 }
 
+void DocumentManager::SaveDocument() {
+  if (documents_[current_document_].saved || documents_[current_document_].path.empty()) {
+    return;
+  }
+  std::ofstream file( documents_[current_document_].path, std::ios::binary);
+  if (file.is_open()) {
+    std::string serializedData = SerializeDocument(documents_[current_document_]);
+    file.write(serializedData.c_str(), serializedData.size());
+    file.close();
+
+    if (file.good()) {
+      documents_[current_document_].saved = true;
+    }
+  }
+}
+
+void DocumentManager::LoadDocument() {}
+std::string DocumentManager::SerializeDocument(Document& document) {
+  auto json_string = std::format(R"({{
+  "Name": "{}",
+  "Version": "{}",
+  "State": {{
+    "Zoom": {},
+    "Offset": {}
+  }},
+  "Events": [
+)",
+    document.name, PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR,
+    document.state.zoom, document.state.offset);
+
+  for (uint64_t i = 0; i < document.events.size(); i++) {
+    json_string += std::format(R"(    {{
+      "Id": {},
+      "Year": {},
+      "Headline": "{}",
+      "Description": "{}",
+      "Expanded": {}
+    }})",document.events[i].id, document.events[i].year,
+    document.events[i].headline, document.events[i].description,
+    document.events[i].expanded);
+    if (i+1 != document.events.size()) {
+      json_string += ",\n";
+    } else {
+      json_string += "\n";
+    }
+  }
+  json_string += "  ]\n}\n";
+  return json_string;
+}
+Document DocumentManager::DeserializeDocument(
+  std::filesystem::path const document_path) {}
 
 }  // namespace linea_one

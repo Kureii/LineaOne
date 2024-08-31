@@ -18,7 +18,7 @@ Dependencies:
   - [x] Sort timeline events
   - [x] Drag and drop move events
   - [x] Show timeline
-  - [ ] Save file (*.jsonlo)
+  - [x] Save file (*.jsonlo)
   - [ ] Load file (*.jsonlo)
   - [ ] Export to SVG
 

@@ -35,8 +35,9 @@ UiManager::UiManager(const std::shared_ptr<DocumentManager>& p_doc_man,
 
 void UiManager::RenderMenu() {
   p_main_menu_->Render();
-  show_unsaved_dialog_ |= p_main_menu_->IsShowUnsavedDialog();
-  stop_rendering_ |= p_main_menu_->IsStopRendering();
+  show_unsaved_dialog_ = p_main_menu_->IsShowUnsavedDialog();
+  stop_rendering_ = p_main_menu_->IsStopRendering();
+  show_save_dialog_ = p_main_menu_->IsShowSaveDialog();
   SetSharedVars();
 }
 
@@ -65,6 +66,12 @@ void UiManager::RenderContent() {
     if (show_unsaved_dialog_) {
       p_modal_dialogs_->RenderUnsavedChanges();
       show_unsaved_dialog_ = p_modal_dialogs_->GetShowUnsavedDialog();
+      show_save_dialog_ = p_modal_dialogs_->GetShowSavedDialog();
+    }
+    if (show_save_dialog_) {
+      p_modal_dialogs_->RenderSaveDialog();
+      show_save_dialog_ = p_modal_dialogs_->GetShowSavedDialog();
+      p_main_menu_->SetShowSaveDialog(show_save_dialog_);
     }
   }
 }
@@ -117,6 +124,11 @@ void UiManager::SetStopRendering(const bool stop_rendering) {
 void UiManager::SetSharedVars() const {
   p_main_menu_->SetShowUnsavedDialog(show_unsaved_dialog_);
   p_modal_dialogs_->SetShowUnsavedDialog(show_unsaved_dialog_);
+  p_modal_dialogs_->SetShowSavedDialog(show_save_dialog_);
+  if (show_unsaved_dialog_) {
+    p_modal_dialogs_->SetShowUnsavedDialog(false);
+    p_modal_dialogs_->RefreshDirectoryContents();
+  }
 }
 
 std::shared_ptr<UiDocumentTab> UiManager::GetUiDocumentTab() const {

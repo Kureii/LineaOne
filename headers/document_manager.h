@@ -22,8 +22,10 @@
 
 #include <document.h>
 
+
 #include <cstdint>
 #include <vector>
+#include <nlohmann/json.hpp>
 
 namespace linea_one {
 
@@ -42,8 +44,12 @@ class DocumentManager {
   void SetCurrentDocumentIndex(int32_t const index);
   void SetDocToClose(int32_t const index);
   void SetDocOnIndex(Document& document, int64_t const index);
+  void SaveDocument();
+  void LoadDocument();
 
  private:
+  std::string SerializeDocument(Document &document);
+  Document DeserializeDocument(std::filesystem::path const document_path);
   std::vector<Document> documents_;
   uint64_t new_doc_counter = 0;
   int32_t current_document_ = -1;

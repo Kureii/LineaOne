@@ -16,7 +16,7 @@ message(STATUS "Started CMake for ${PROJECT_NAME} v${PROJECT_VERSION}...")
 
 configure_file(
         cmake/config.h.in
-        src/config.h
+        headers/config.h
 )
 
 include(FetchContent)
@@ -68,6 +68,7 @@ include_directories(${PROJECT_NAME}
         headers
         ${IMGUI_DIR}
         ${IMGUI_DIR}/backends
+        ${CMAKE_CURRENT_BINARY_DIR}/headers
 )
 add_custom_target(copy_resources ALL
         COMMAND ${CMAKE_COMMAND} -E copy_directory
