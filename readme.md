@@ -2,9 +2,17 @@
 
 Specialized software for creating timelines for presentations.
 
-Dependencies:
+## Dependencies:
 
 - SDL3
+
+## Known issues
+- if two headings are in the same year, they overlap
+- diacritics do not appear
+- untreated document reopening
+- displaying files that are not `*.jsonlo` and are not folders
+- showing hidden folders
+- no checking of `*.jsonlo` data
 
 ## Road map
 
