@@ -21,7 +21,7 @@
 #pragma once
 
 #include <document_manager.h>
-
+#include <export_document.h>
 #include <memory>
 
 namespace linea_one::ui {
@@ -33,14 +33,17 @@ class UiModalDialogs {
   void RenderUnsavedChanges();
   void RenderSaveDialog();
   void RenderLoadDialog();
+  void RenderExportDialog();
   void RefreshDirectoryContents();
 
   void SetShowUnsavedDialog(const bool show_unsaved_dialog);
   void SetShowSaveDialog(const bool show_save_dialog);
   void SetShowLoadDialog(const bool show_load_dialog);
+  void SetShowExportDialog(const bool show_export_dialog);
   [[nodiscard]] bool GetShowUnsavedDialog() const;
   [[nodiscard]] bool GetShowSaveDialog() const;
   [[nodiscard]] bool GetShowLoadDialog() const;
+  [[nodiscard]] bool GetShowExportDialog() const;
 
 
  private:
@@ -48,12 +51,14 @@ class UiModalDialogs {
   bool show_unsaved_dialog_;
   bool show_save_dialog_;
   bool show_load_dialog_ = false;
+  bool show_export_dialog_ = false;
   std::filesystem::path current_path_;
  std::optional<std::filesystem::path> selected_file_;
   std::vector<std::string> dir_contents_;
   std::string file_name_ = "Untitled.jsonlo";
   char file_name_buffer_[256];
   int selected_index_ = -1;
+  ExportDocument export_doc_;
 };
 
 }  // namespace linea_one::ui

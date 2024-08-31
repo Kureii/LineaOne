@@ -28,7 +28,7 @@ Specialized software for creating timelines for presentations.
   - [x] Show timeline
   - [x] Save file (*.jsonlo)
   - [x] Load file (*.jsonlo)
-  - [ ] Export to SVG
+  - [x] Export to SVG
 
 Note: `.jsonlo` is a specific format for this software. At its base, it is a `*.json` file with a specific structure for LineaOne.
 

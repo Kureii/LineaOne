@@ -4,6 +4,7 @@ set(sources
     src/input_manager.cpp
     src/renderer.cpp
     src/svg_icon.cpp
+    src/export_document.cpp
     src/ui/ui_elements.cpp
     src/ui/ui_manager.cpp
     src/ui/ui_main_menu.cpp

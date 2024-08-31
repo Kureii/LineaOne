@@ -39,6 +39,7 @@ void UiManager::RenderMenu() {
   stop_rendering_ = p_main_menu_->IsStopRendering();
   show_save_dialog_ = p_main_menu_->IsShowSaveDialog();
   show_load_dialog_ = p_main_menu_->IsShowLoadDialog();
+  show_export_dialog_ = p_main_menu_->IsShowExportDialog();
   SetSharedVars();
 }
 
@@ -75,6 +76,11 @@ void UiManager::RenderContent() {
       p_main_menu_->SetShowSaveDialog(show_save_dialog_);
     }
 
+    if (show_export_dialog_) {
+      p_modal_dialogs_->RenderExportDialog();
+      show_load_dialog_ = p_modal_dialogs_->GetShowExportDialog();
+      p_main_menu_->SetShowExportDialog(show_load_dialog_);
+    }
 
   }
   if (show_load_dialog_) {
@@ -134,6 +140,7 @@ void UiManager::SetSharedVars() const {
   p_modal_dialogs_->SetShowUnsavedDialog(show_unsaved_dialog_);
   p_modal_dialogs_->SetShowSaveDialog(show_save_dialog_);
   p_modal_dialogs_->SetShowLoadDialog(show_load_dialog_);
+  p_modal_dialogs_->SetShowExportDialog(show_export_dialog_);
   if (show_unsaved_dialog_) {
     p_modal_dialogs_->SetShowUnsavedDialog(false);
     p_modal_dialogs_->RefreshDirectoryContents();

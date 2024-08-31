@@ -50,6 +50,9 @@ void UiMainMenu::Render() {
       if (ImGui::MenuItem("Close file", "Ctrl+W")) {
         CloseFile();
       }
+      if (ImGui::MenuItem("Export")) {
+        ExportFileDialog();
+      }
       if (ImGui::MenuItem("Exit")) {
         stop_rendering_ = true;
       }
@@ -63,6 +66,7 @@ bool UiMainMenu::IsShowUnsavedDialog() const { return show_unsaved_dialog_; }
 bool UiMainMenu::IsShowSaveDialog() const { return show_save_dialog_; }
 
 bool UiMainMenu::IsShowLoadDialog() const { return show_load_dialog_; }
+bool UiMainMenu::IsShowExportDialog() const { return show_export_dialog_; }
 
 bool UiMainMenu::IsStopRendering() const { return stop_rendering_; }
 
@@ -76,6 +80,9 @@ void UiMainMenu::SetShowSaveDialog(const bool show_save_dialog) {
 
 void UiMainMenu::SetShowLoadDialog(const bool show_load_dialog) {
   show_load_dialog_ = show_load_dialog;
+}
+void UiMainMenu::SetShowExportDialog(const bool show_export_dialog) {
+  show_export_dialog_ = show_export_dialog;
 }
 
 void UiMainMenu::NewFile() const { p_doc_man_->CreateNewDocument(); }
@@ -92,5 +99,8 @@ void UiMainMenu::SaveFileDialog() {
     show_save_dialog_ = true;
   }
 }
+
+void UiMainMenu::ExportFileDialog() { show_export_dialog_ = true; }
+
 
 }  // namespace linea_one::ui

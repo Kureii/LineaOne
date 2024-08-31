@@ -31,6 +31,7 @@ UiModalDialogs::UiModalDialogs(
   current_path_ = std::getenv("HOME");
 #endif
   RefreshDirectoryContents();
+  export_doc_ = ExportDocument();
 }
 
 void UiModalDialogs::RenderUnsavedChanges() {
@@ -91,7 +92,6 @@ void UiModalDialogs::RenderSaveDialog() {
       }
     }
 
-    // Přidáme oblast pro zobrazení seznamu souborů a složek
     ImGui::BeginChild("File Browser", ImVec2(0, 200), true);
     for (size_t i = 0; i < dir_contents_.size(); i++) {
       const auto& entry = dir_contents_[i];
@@ -138,6 +138,76 @@ void UiModalDialogs::RenderSaveDialog() {
     ImGui::SameLine();
     if (ImGui::Button("Cancel", ImVec2(120, 0))) {
       show_save_dialog_ = false;
+      ImGui::CloseCurrentPopup();
+    }
+
+    ImGui::EndPopup();
+  }
+}
+
+void UiModalDialogs::RenderExportDialog() {
+  if (show_export_dialog_) {
+    ImGui::OpenPopup("Export");
+  }
+
+  ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
+  if (ImGui::BeginPopupModal(
+        "Export", &show_export_dialog_, ImGuiWindowFlags_AlwaysAutoResize)) {
+    ImGui::Text("Current Path: %s", current_path_.string().c_str());
+
+    if (ImGui::Button("..")) {
+      if (current_path_.has_parent_path()) {
+        current_path_ = current_path_.parent_path();
+        RefreshDirectoryContents();
+      }
+    }
+
+    ImGui::BeginChild("File Browser", ImVec2(0, 200), true);
+    for (size_t i = 0; i < dir_contents_.size(); i++) {
+      const auto& entry = dir_contents_[i];
+      bool is_dir = is_directory(current_path_ / entry);
+      std::string label = (is_dir ? "[D] " : "    ") + entry;
+
+      if (ImGui::Selectable(
+            label.c_str(), selected_index_ == static_cast<int>(i))) {
+        selected_index_ = static_cast<int>(i);
+        if (is_dir) {
+          current_path_ /= entry;
+          RefreshDirectoryContents();
+          selected_index_ = -1;
+        } else {
+          strncpy(
+            file_name_buffer_, entry.c_str(), sizeof(file_name_buffer_) - 1);
+          file_name_buffer_[sizeof(file_name_buffer_) - 1] = '\0';
+        }
+      }
+    }
+    ImGui::EndChild();
+
+    ImGui::InputText("File Name", file_name_buffer_, sizeof(file_name_buffer_));
+
+    if (ImGui::Button("Export", ImVec2(120, 0))) {
+      std::string file_name = file_name_buffer_;
+
+      const std::string extension = ".svg";
+      if (file_name.length() >= extension.length()) {
+        if (file_name.compare(file_name.length() - extension.length(),
+              extension.length(), extension) != 0) {
+          file_name += extension;
+        }
+      } else {
+        file_name += extension;
+      }
+
+      auto full_path = current_path_ / file_name;
+      export_doc_.SaveTimelineAsSVG(p_doc_man_->GetCurrentDocument()->events,
+        p_doc_man_->GetCurrentDocument()->state, full_path);
+      show_export_dialog_ = false;
+      ImGui::CloseCurrentPopup();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+      show_export_dialog_ = false;
       ImGui::CloseCurrentPopup();
     }
 
@@ -223,6 +293,10 @@ void UiModalDialogs::SetShowLoadDialog(const bool show_load_dialog) {
   show_load_dialog_ = show_load_dialog;
 }
 
+void UiModalDialogs::SetShowExportDialog(const bool show_export_dialog) {
+  show_export_dialog_ = show_export_dialog;
+}
+
 bool UiModalDialogs::GetShowUnsavedDialog() const {
   return show_unsaved_dialog_;
 }
@@ -230,4 +304,5 @@ bool UiModalDialogs::GetShowUnsavedDialog() const {
 bool UiModalDialogs::GetShowSaveDialog() const { return show_save_dialog_; }
 
 bool UiModalDialogs::GetShowLoadDialog() const { return show_load_dialog_; }
+bool UiModalDialogs::GetShowExportDialog() const { return show_export_dialog_; }
 }  // namespace linea_one::ui

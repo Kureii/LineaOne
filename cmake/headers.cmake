@@ -6,6 +6,7 @@ set(headers
     headers/renderer.h
     headers/svg_icon.h
     headers/timeline_state.h
+    headers/export_document.h
     headers/ui/ui_elements.h
     headers/ui/ui_manager.h
     headers/ui/ui_main_menu.h
