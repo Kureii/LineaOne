@@ -104,6 +104,8 @@ void UiDocumentTab::AddNewEvent(Document& document) {
   document.events.emplace_back(last_id_, new_year_, "", false, "");
   last_id_++;
   new_year_++;
+  document.saved = false;
+  DocumentHasChanged();
 }
 
 void UiDocumentTab::StartSort(Document& document, uint64_t index,
@@ -305,6 +307,7 @@ void UiDocumentTab::RenderExpanderButton(
   if (elements::RenderIconButton(name, icon, 3, ICON_SIZE, ICON_SIZE, icon_pos,
         0, 20, width - 16, ImVec2(0, height - 28))) {
     event.expanded = !event.expanded;
+    DocumentHasChanged();
   }
 }
 
@@ -321,6 +324,7 @@ void UiDocumentTab::RenderDateInput(TimelineEvent& event, const float width) {
         "##Date", &year_, 1, 0, 100000, "%d", ImGuiSliderFlags_AlwaysClamp)) {
     event.year = year_;
     ParseYear(event, index_bc_ac_);
+    DocumentHasChanged();
   }
   if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
   ImGui::SameLine(width - 60, 0);
@@ -332,6 +336,7 @@ void UiDocumentTab::RenderDateInput(TimelineEvent& event, const float width) {
       if (ImGui::Selectable(bc_ac_items_[n], is_selected)) {
         index_bc_ac_ = n;
         ParseYear(event, index_bc_ac_);
+        DocumentHasChanged();
       }
 
       if (is_selected) {
@@ -354,6 +359,7 @@ void UiDocumentTab::RenderHeadlineInput(
   if (ImGui::InputText(std::format("##HeadlineInput_{}", event.id).c_str(),
         a_buffer_headline_, BUFFER_HEADLINE_SIZE)) {
     event.headline = std::string(a_buffer_headline_);
+    DocumentHasChanged();
   }
   ImGui::PopStyleVar(2);
 }
@@ -370,6 +376,7 @@ void UiDocumentTab::RenderDescriptionInput(
   if (ImGui::InputText(std::format("##DescriptionInput_{}", event.id).c_str(),
         a_buffer_description_, BUFFER_DESCRIPTION_SIZE)) {
     event.description = std::string(a_buffer_description_);
+    DocumentHasChanged();
   }
   ImGui::PopStyleVar(2);
 }
@@ -387,6 +394,7 @@ void UiDocumentTab::DeleteEvent(Document& doc, const TimelineEvent& event) {
   for (uint64_t i = 0; i < doc.events.size(); ++i) {
     if (doc.events[i].id == event.id) {
       doc.events.erase(doc.events.begin() + i);
+      DocumentHasChanged();
     }
   }
 }
@@ -397,6 +405,7 @@ void UiDocumentTab::SwapEvents(
       source_index < document.events.size() && target_index >= 0 &&
       target_index < document.events.size()) {
     std::swap(document.events[source_index], document.events[target_index]);
+    DocumentHasChanged();
   }
 }
 
@@ -410,6 +419,7 @@ void UiDocumentTab::RenderSort(
     StartSort(document, index,
       [this](Document& document_document, uint64_t index_index) {
         p_doc_man_->SetDocOnIndex(document_document, index_index);
+        DocumentHasChanged();
       });
   }
 
@@ -434,5 +444,10 @@ void UiDocumentTab::RenderSort(
     ImGui::PopStyleColor();
   }
 }
+
+void UiDocumentTab::DocumentHasChanged(){
+  p_doc_man_->GetCurrentDocument()->saved = false;
+}
+
 
 }  // namespace linea_one::ui

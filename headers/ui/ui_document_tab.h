@@ -73,6 +73,7 @@ class UiDocumentTab {
     Document& document, uint64_t source_index, uint64_t target_index);
   inline void RenderSort(Document& document, uint64_t index,
     ImVec2 content_size);
+  inline void DocumentHasChanged();
 
   std::shared_ptr<SDL_Renderer> p_renderer_;
   std::shared_ptr<svg::SvgIcon> p_drag_icon_;
