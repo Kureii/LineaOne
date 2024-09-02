@@ -19,46 +19,120 @@
  * Created by kureii on 8/31/24
  */
 #include <export_document.h>
+#include <imgui.h>
+
+#include <algorithm>
+#include <cmath>
 #include <fstream>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace linea_one {
 
+struct EventPosition {
+  float x;
+  float y;
+  int year;
+};
+
+std::string utf8ToXMLEntities(const std::string& input) {
+  std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
+  std::u32string utf32 = converter.from_bytes(input);
+
+  std::ostringstream result;
+  for (char32_t c : utf32) {
+    if (c <= 127) {
+      switch (c) {
+        case '&':  result << "&amp;";  break;
+        case '\"': result << "&quot;"; break;
+        case '\'': result << "&apos;"; break;
+        case '<':  result << "&lt;";   break;
+        case '>':  result << "&gt;";   break;
+        default:   result << static_cast<char>(c); break;
+      }
+    } else {
+      result << "&#" << static_cast<uint32_t>(c) << ";";
+    }
+  }
+  return result.str();
+}
+
 std::string ExportDocument::ExportTimelineToSVG(
   const std::vector<TimelineEvent>& events, const TimelineState& state) {
-  std::ostringstream svg;
-  svg << R"(<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200" viewBox="0 0 800 200">\n)";
-  svg << "<style>\n"
-      << "  text { font-family: Arial, sans-serif; }\n"
-      << "  .year { fill: #1d1d1d; font-size: 12px; }\n"
-      << "  .headline { fill: #1d1d1d; font-size: 14px; }\n"
-      << "</style>\n";
+  const float minPointWidth = 100.0f;
+  const float padding = 20.0f;
+  const int baseHeight = 250;
+  const float textHeight = 20.0f;
+  const float yearTextY = baseHeight / 2 + 20;
+  const float circleY = baseHeight / 2;
 
-  // Main timeline axis
-  svg << R"(<line x1="50" y1="100" x2="750" y2="100" stroke="#1d1d1d" stroke-width="2" />\n)";
-
-  int minYear = events.empty() ? 0 : events[0].year;
-  int maxYear = events.empty() ? 0 : events[0].year;
-  for (const auto& event : events) {
-    minYear = std::min(minYear, event.year);
-    maxYear = std::max(maxYear, event.year);
-  }
-
-  auto mapYearToX = [&](int year) {
-    float normalizedYear = (year - minYear) / static_cast<float>(maxYear - minYear);
-    return 50 + (normalizedYear * 700 * state.zoom) + state.offset;
+  auto getTextWidth = [](const std::string& text) {
+    return ImGui::CalcTextSize(text.c_str()).x;
   };
 
+  std::map<int, std::vector<const TimelineEvent*>> eventsByYear;
   for (const auto& event : events) {
-    float x = mapYearToX(event.year);
+    eventsByYear[event.year].push_back(&event);
+  }
 
-    svg << "<circle cx=\"" << x << "\" cy=\"100\" r=\"5\" fill=\"#0078fa\" />\n";
-    svg << "<text x=\"" << x << R"(" y="120" text-anchor="middle" class="year">)" << event.year << "</text>\n";
-    svg << "<text x=\"" << x << R"(" y="85" text-anchor="middle" class="headline">)" << event.headline << "</text>\n";
+  float totalWidth = 0.0f;
+  std::map<int, float> yearXPositions;
+  for (const auto& [year, yearEvents] : eventsByYear) {
+    float maxWidth = minPointWidth;
+    for (const auto* event : yearEvents) {
+      float headlineWidth = getTextWidth(event->headline);
+      maxWidth = std::max(maxWidth, headlineWidth);
+    }
+    float width = maxWidth + padding;
+    yearXPositions[year] = totalWidth + width / 2;
+    totalWidth += width;
+  }
+
+  int maxEventsInYear = 0;
+  for (const auto& [year, yearEvents] : eventsByYear) {
+    maxEventsInYear = std::max(maxEventsInYear, static_cast<int>(yearEvents.size()));
+  }
+  int svgHeight = baseHeight + (maxEventsInYear - 1) * textHeight;
+
+  std::ostringstream svg;
+  svg << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+  svg << R"(<svg xmlns="http://www.w3.org/2000/svg" width=")" << totalWidth << R"(" height=")" << svgHeight
+      << R"(" viewBox="0 0 )" << totalWidth << " " << svgHeight << R"(">
+<style>
+  text { font-family: Arial, sans-serif; }
+  .year { fill: #1d1d1d; font-size: 12px; }
+  .headline { fill: #1d1d1d; font-size: 14px; }
+  .description { display: none; }
+</style>
+)";
+
+  svg << R"(<line x1="0" y1=")" << circleY << R"(" x2=")" << totalWidth
+      << R"(" y2=")" << circleY << R"(" stroke="#1d1d1d" stroke-width="2" />
+)";
+
+  for (const auto& [year, yearEvents] : eventsByYear) {
+    float x = yearXPositions[year];
+    for (size_t i = 0; i < yearEvents.size(); ++i) {
+      const auto* event = yearEvents[i];
+      float textY = circleY - 15 - (i * textHeight);
+
+      svg << "<g>\n"
+          << "  <circle cx=\"" << x << "\" cy=\"" << circleY << "\" r=\"5\" fill=\"#0078fa\" />\n"
+          << "  <text x=\"" << x << "\" y=\"" << yearTextY
+          << "\" text-anchor=\"middle\" class=\"year\">" << year << "</text>\n"
+          << "  <text x=\"" << x << "\" y=\"" << textY
+          << "\" text-anchor=\"middle\" class=\"headline\">" << utf8ToXMLEntities(event->headline) << "</text>\n"
+          << "  <text x=\"" << x << "\" y=\"0\" class=\"description\">" << utf8ToXMLEntities(event->description) << "</text>\n"
+          << "</g>\n";
+    }
   }
 
   svg << "</svg>";
   return svg.str();
 }
+
 void ExportDocument::SaveTimelineAsSVG(const std::vector<TimelineEvent>& events,
   const TimelineState& state, const std::filesystem::path path) {
   std::string svgContent = ExportTimelineToSVG(events, state);
